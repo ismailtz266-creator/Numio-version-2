@@ -43,19 +43,19 @@ export default function Home({ chapter, onExamReady, onBack }) {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 py-12">
+    <div className="bg-white flex flex-col px-5" style={{ height: '100dvh' }}>
 
       {/* Back */}
       <button
         onClick={onBack}
-        className="self-start text-muted font-body font-bold text-sm mb-8 flex items-center gap-1 active:opacity-60"
+        className="flex-shrink-0 text-muted font-body font-bold text-sm mt-12 mb-6 flex items-center gap-1 active:opacity-60 self-start"
       >
         ← Back
       </button>
 
       {/* Header */}
-      <div className="mb-10 text-center">
-        <span style={{ fontSize: 48 }}>{chapter.emoji}</span>
+      <div className="flex-shrink-0 text-center mb-8">
+        <span style={{ fontSize: 52 }}>{chapter.emoji}</span>
         <h1 className="font-display font-extrabold text-3xl text-ink tracking-tight mt-2">
           {chapter.name}
         </h1>
@@ -66,49 +66,50 @@ export default function Home({ chapter, onExamReady, onBack }) {
 
       {/* Image preview */}
       {preview && (
-        <div className="mb-6 w-full max-w-xs rounded-2xl overflow-hidden border-2 border-gray-100 shadow-sm">
-          <img src={preview} alt="Selected" className="w-full object-cover" />
+        <div className="flex-shrink-0 mb-6 w-full rounded-2xl overflow-hidden border-2 border-gray-100 shadow-sm max-h-56">
+          <img src={preview} alt="Selected" className="w-full h-full object-cover" />
         </div>
       )}
 
       {/* States */}
-      {status === 'idle' && (
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          className="w-full max-w-xs bg-duo active:bg-duo-dark text-white font-display font-bold text-lg rounded-2xl py-5 shadow-[0_4px_0_#58a700] active:shadow-none active:translate-y-1 transition-all"
-        >
-          📸 Take Photo or Select
-        </button>
-      )}
-
-      {status === 'loading' && (
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-14 h-14 rounded-full border-4 border-gray-100 border-t-duo animate-spin" />
-          <p className="font-display font-bold text-lg text-ink">Generating your quiz...</p>
-          <p className="text-muted text-sm">Claude is reading the image ✨</p>
-        </div>
-      )}
-
-      {status === 'error' && (
-        <div className="w-full max-w-xs flex flex-col gap-4">
-          <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
-            <p className="font-display font-bold text-xl text-duo-red">Something went wrong</p>
-            <p className="text-xs text-muted mt-2 font-mono break-all">{error}</p>
-          </div>
+      <div className="flex-1 flex flex-col items-center justify-center gap-4 pb-10">
+        {status === 'idle' && (
           <button
-            onClick={handleReset}
-            className="w-full bg-duo active:bg-duo-dark text-white font-display font-bold text-lg rounded-2xl py-4 shadow-[0_4px_0_#58a700] active:shadow-none active:translate-y-1 transition-all"
+            onClick={() => fileInputRef.current?.click()}
+            className="w-full bg-duo active:bg-duo-dark text-white font-display font-bold text-lg rounded-2xl py-5 shadow-[0_4px_0_#58a700] active:shadow-none active:translate-y-1 transition-all"
           >
-            Try Again
+            📸 Take Photo or Select
           </button>
-        </div>
-      )}
+        )}
+
+        {status === 'loading' && (
+          <div className="flex flex-col items-center gap-4">
+            <div className="w-14 h-14 rounded-full border-4 border-gray-100 border-t-duo animate-spin" />
+            <p className="font-display font-bold text-lg text-ink">Generating your quiz...</p>
+            <p className="text-muted text-sm">Claude is reading the image ✨</p>
+          </div>
+        )}
+
+        {status === 'error' && (
+          <div className="w-full flex flex-col gap-4">
+            <div className="bg-red-50 border border-red-200 rounded-2xl p-4 text-center">
+              <p className="font-display font-bold text-xl text-duo-red">Something went wrong</p>
+              <p className="text-xs text-muted mt-2 font-mono break-all">{error}</p>
+            </div>
+            <button
+              onClick={handleReset}
+              className="w-full bg-duo active:bg-duo-dark text-white font-display font-bold text-lg rounded-2xl py-4 shadow-[0_4px_0_#58a700] active:shadow-none active:translate-y-1 transition-all"
+            >
+              Try Again
+            </button>
+          </div>
+        )}
+      </div>
 
       <input
         ref={fileInputRef}
         type="file"
         accept="image/*"
-        capture="environment"
         className="hidden"
         onChange={handleImageSelected}
       />
