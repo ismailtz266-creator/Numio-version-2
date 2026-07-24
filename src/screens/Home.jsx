@@ -18,6 +18,7 @@ export default function Home({ chapter, onExamReady, onBack }) {
 
     try {
       const exam = await generateExam(file)
+      console.log('✅ Fresh exam from Claude:', exam.topic, exam.questions?.length, 'questions')
 
       // Save to DB under this chapter
       const saved = await saveExam({
