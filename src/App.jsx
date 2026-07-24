@@ -10,16 +10,20 @@ import Rewards from './screens/Rewards'
 import ParentZone from './screens/ParentZone'
 import QuizIntro from './screens/QuizIntro'
 
-// Screens where Nav is hidden (full-screen flows)
 const HIDE_NAV = ['quiz', 'scan', 'quiz_intro']
 
 export default function App() {
-  const [authReady, setAuthReady]         = useState(false)
-  const [tab, setTab]                     = useState('chapters') // active nav tab
-  const [screen, setScreen]               = useState('chapters') // current screen
-  const [activeChapter, setActiveChapter] = useState(null)
-  const [activeExam, setActiveExam]       = useState(null)
-  const [revisionExams, setRevisionExams] = useState([])
+  const [authReady, setAuthReady] = useState(false)
+  const [tab, setTab]             = useState('chapters')
+
+  // Single nav state object — screen + all associated data
+  // Updating one object = one React render, no race conditions
+  const [nav, setNav] = useState({
+    screen:        'chapters',
+    chapter:       null,
+    exam:          null,
+    revisionExams: [],
+  })
 
   useEffect(() => {
     ensureAuth().finally(() => setAuthReady(true))
@@ -33,108 +37,77 @@ export default function App() {
     )
   }
 
-  // ── Nav tab change ────────────────────────────────────────────
+  const { screen, chapter, exam, revisionExams } = nav
+
+  function go(updates) {
+    setNav(prev => ({ ...prev, ...updates }))
+  }
 
   function handleTabChange(newTab) {
     setTab(newTab)
-    setScreen(newTab)
-    // Reset chapter flow when switching tabs
-    setActiveChapter(null)
-    setActiveExam(null)
-  }
-
-  // ── Chapter flow handlers ─────────────────────────────────────
-
-  function goToChapter(chapter) {
-    setActiveChapter(chapter)
-    setScreen('current_chapter')
-  }
-
-  function goToScan(chapter) {
-    setActiveChapter(chapter)
-    setActiveExam(null) // clear any stale exam
-    setScreen('scan')
-  }
-
-  function goToRevision(chapter, exams) {
-    setActiveChapter(chapter)
-    setRevisionExams(exams)
-    setScreen('revision')
-  }
-
-  function goToQuiz(exam) {
-    setActiveExam(exam)
-    setScreen('quiz_intro')
-  }
-
-  function handleExamReady(exam) {
-    setActiveExam(exam)
-    setScreen('quiz_intro')
-  }
-
-  function handleQuizDone() {
-    setScreen('current_chapter')
+    go({ screen: newTab, chapter: null, exam: null, revisionExams: [] })
   }
 
   const showNav = !HIDE_NAV.includes(screen)
 
-  // ── Render ────────────────────────────────────────────────────
-
   return (
     <div className="flex">
-      {/* Sidebar (desktop only) — always rendered when nav is visible */}
       {showNav && <Nav active={tab} onChange={handleTabChange} />}
 
-      {/* Main content — offset on desktop to account for sidebar */}
       <main
         className={`flex-1 ${showNav ? 'md:ml-56' : ''}`}
         style={{ paddingBottom: showNav ? 'calc(64px + env(safe-area-inset-bottom))' : 0 }}
       >
         {screen === 'chapters' && (
-          <Chapters onSelectChapter={goToChapter} />
+          <Chapters
+            onSelectChapter={c => go({ screen: 'current_chapter', chapter: c })}
+          />
         )}
 
         {screen === 'current_chapter' && (
           <CurrentChapter
-            chapter={activeChapter}
-            onNew={goToScan}
-            onRevision={goToRevision}
-            onBack={() => setScreen('chapters')}
+            chapter={chapter}
+            onNew={c => go({ screen: 'scan', chapter: c, exam: null })}
+            onRevision={(c, exams) => go({ screen: 'revision', chapter: c, revisionExams: exams })}
+            onBack={() => go({ screen: 'chapters' })}
           />
         )}
 
         {screen === 'scan' && (
           <Home
-            chapter={activeChapter}
-            onExamReady={handleExamReady}
-            onBack={() => setScreen('current_chapter')}
+            chapter={chapter}
+            onExamReady={freshExam => {
+              console.log('✅ Navigating to quiz_intro with exam:', freshExam.topic)
+              go({ screen: 'quiz_intro', exam: freshExam })
+            }}
+            onBack={() => go({ screen: 'current_chapter' })}
           />
         )}
 
         {screen === 'revision' && (
           <Revision
-            chapter={activeChapter}
+            chapter={chapter}
             exams={revisionExams}
-            onSelectExam={goToQuiz}
-            onBack={() => setScreen('current_chapter')}
+            onSelectExam={e => go({ screen: 'quiz_intro', exam: e })}
+            onBack={() => go({ screen: 'current_chapter' })}
           />
         )}
 
-        {screen === 'quiz_intro' && (
+        {screen === 'quiz_intro' && exam && (
           <QuizIntro
-            exam={activeExam}
-            onStart={() => setScreen('quiz')}
+            exam={exam}
+            onStart={() => go({ screen: 'quiz' })}
           />
         )}
 
-        {screen === 'quiz' && (
+        {screen === 'quiz' && exam && (
           <Quiz
-            exam={activeExam}
-            onDone={handleQuizDone}
+            exam={exam}
+            onDone={() => go({ screen: 'current_chapter' })}
           />
         )}
 
-        {screen === 'rewards' && <Rewards />}
+        {screen === 'rewards'     && <Rewards />}
         {screen === 'parent_zone' && <ParentZone />}
       </main>
     </div>
