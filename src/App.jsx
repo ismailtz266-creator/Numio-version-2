@@ -52,6 +52,7 @@ export default function App() {
 
   function goToScan(chapter) {
     setActiveChapter(chapter)
+    setActiveExam(null) // clear any stale exam
     setScreen('scan')
   }
 
