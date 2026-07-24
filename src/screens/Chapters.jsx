@@ -42,31 +42,37 @@ export default function Chapters({ onSelectChapter }) {
 
       {/* Header */}
       <div className="flex-shrink-0 px-5 pt-12 pb-4">
-        <h1 className="font-display font-extrabold text-3xl text-ink">My Chapters</h1>
-        <p className="text-muted font-body text-sm mt-1">Pick a subject to study 📚</p>
+        <div className="max-w-2xl mx-auto">
+          <h1 className="font-display font-extrabold text-3xl text-ink">My Chapters</h1>
+          <p className="text-muted font-body text-sm mt-1">Pick a subject to study 📚</p>
+        </div>
       </div>
 
       {/* Scrollable content */}
       <div className="flex-1 overflow-y-auto px-5 pb-10">
-        {chapters.length === 0 ? (
-          <EmptyState onAdd={() => setShowModal(true)} />
-        ) : (
-          <div className="flex flex-col gap-4">
-            {chapters.map(chapter => (
-              <ChapterCard
-                key={chapter.id}
-                chapter={chapter}
-                onClick={() => onSelectChapter(chapter)}
-              />
-            ))}
-            <button
-              onClick={() => setShowModal(true)}
-              className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-muted font-display font-bold text-base active:bg-gray-50 transition-colors"
-            >
-              + Add more chapters
-            </button>
-          </div>
-        )}
+        <div className="max-w-2xl mx-auto">
+          {chapters.length === 0 ? (
+            <EmptyState onAdd={() => setShowModal(true)} />
+          ) : (
+            <div className="flex flex-col gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {chapters.map(chapter => (
+                  <ChapterCard
+                    key={chapter.id}
+                    chapter={chapter}
+                    onClick={() => onSelectChapter(chapter)}
+                  />
+                ))}
+              </div>
+              <button
+                onClick={() => setShowModal(true)}
+                className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-muted font-display font-bold text-base active:bg-gray-50 hover:bg-gray-50 transition-colors"
+              >
+                + Add more chapters
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {showModal && (
