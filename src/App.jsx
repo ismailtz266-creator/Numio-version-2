@@ -8,9 +8,10 @@ import Revision from './screens/Revision'
 import Quiz from './screens/Quiz'
 import Rewards from './screens/Rewards'
 import ParentZone from './screens/ParentZone'
+import QuizIntro from './screens/QuizIntro'
 
 // Screens where Nav is hidden (full-screen flows)
-const HIDE_NAV = ['quiz', 'scan']
+const HIDE_NAV = ['quiz', 'scan', 'quiz_intro']
 
 export default function App() {
   const [authReady, setAuthReady]         = useState(false)
@@ -62,12 +63,12 @@ export default function App() {
 
   function goToQuiz(exam) {
     setActiveExam(exam)
-    setScreen('quiz')
+    setScreen('quiz_intro')
   }
 
   function handleExamReady(exam) {
     setActiveExam(exam)
-    setScreen('quiz')
+    setScreen('quiz_intro')
   }
 
   function handleQuizDone() {
@@ -115,6 +116,13 @@ export default function App() {
             exams={revisionExams}
             onSelectExam={goToQuiz}
             onBack={() => setScreen('current_chapter')}
+          />
+        )}
+
+        {screen === 'quiz_intro' && (
+          <QuizIntro
+            exam={activeExam}
+            onStart={() => setScreen('quiz')}
           />
         )}
 
