@@ -1,13 +1,11 @@
 import { useState, useEffect } from 'react'
-import { getExamsForChapter, deleteExam } from '../lib/chapters'
+import { getExamsForChapter } from '../lib/chapters'
 
 export default function CurrentChapter({ chapter, onNew, onRevision, onBack }) {
-  const [exams, setExams]   = useState([])
+  const [exams, setExams]     = useState([])
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadExams()
-  }, [chapter.id])
+  useEffect(() => { loadExams() }, [chapter.id])
 
   async function loadExams() {
     try {
@@ -23,70 +21,72 @@ export default function CurrentChapter({ chapter, onNew, onRevision, onBack }) {
   return (
     <div className="min-h-screen bg-white flex flex-col">
 
-      {/* Header */}
-      <div className="px-5 pt-12 pb-6">
-        <button
-          onClick={onBack}
-          className="text-muted font-body font-bold text-sm mb-4 flex items-center gap-1 active:opacity-60"
-        >
-          ← Back
-        </button>
-        <div className="flex items-center gap-4">
-          <span style={{ fontSize: 48 }}>{chapter.emoji}</span>
-          <div>
-            <h1 className="font-display font-extrabold text-3xl text-ink">{chapter.name}</h1>
-            <p className="text-muted font-body text-sm">
-              {loading ? '...' : `${exams.length} exam${exams.length !== 1 ? 's' : ''} saved`}
-            </p>
-          </div>
-        </div>
-      </div>
+      {/* Constrained container */}
+      <div className="w-full max-w-2xl mx-auto px-5">
 
-      {/* Two big buttons */}
-      <div className="px-5 flex flex-col gap-4">
-        {/* New — green */}
-        <button
-          onClick={() => onNew(chapter)}
-          className="w-full bg-duo active:bg-duo-dark text-white font-display font-extrabold text-2xl rounded-3xl py-8 shadow-[0_5px_0_#58a700] active:shadow-none active:translate-y-1 transition-all flex flex-col items-center gap-1"
-        >
-          <span style={{ fontSize: 36 }}>📸</span>
-          New
-        </button>
-
-        {/* Revision — grey */}
-        <button
-          onClick={() => onRevision(chapter, exams)}
-          disabled={exams.length === 0}
-          className="w-full bg-gray-100 active:bg-gray-200 disabled:opacity-40 text-gray-500 font-display font-extrabold text-2xl rounded-3xl py-8 shadow-[0_5px_0_#d1d5db] active:shadow-none active:translate-y-1 transition-all flex flex-col items-center gap-1 disabled:cursor-not-allowed"
-        >
-          <span style={{ fontSize: 36 }}>📋</span>
-          Revision
-          {exams.length === 0 && (
-            <span className="font-body font-normal text-sm text-gray-400">
-              No exams yet
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* Recent exams preview */}
-      {!loading && exams.length > 0 && (
-        <div className="px-5 mt-8">
-          <p className="font-body font-bold text-xs text-muted uppercase tracking-widest mb-3">
-            Recent exams
-          </p>
-          <div className="flex flex-col gap-3">
-            {exams.slice(0, 3).map(exam => (
-              <ExamRow key={exam.id} exam={exam} />
-            ))}
-            {exams.length > 3 && (
-              <p className="text-center text-muted font-body text-sm">
-                +{exams.length - 3} more in Revision
+        {/* Header */}
+        <div className="pt-12 pb-6">
+          <button
+            onClick={onBack}
+            className="text-muted font-body font-bold text-sm mb-4 flex items-center gap-1 active:opacity-60"
+          >
+            ← Back
+          </button>
+          <div className="flex items-center gap-4">
+            <span style={{ fontSize: 48 }}>{chapter.emoji}</span>
+            <div>
+              <h1 className="font-display font-extrabold text-3xl text-ink">{chapter.name}</h1>
+              <p className="text-muted font-body text-sm">
+                {loading ? '...' : `${exams.length} exam${exams.length !== 1 ? 's' : ''} saved`}
               </p>
-            )}
+            </div>
           </div>
         </div>
-      )}
+
+        {/* Two buttons — stacked mobile, side by side desktop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* New — green */}
+          <button
+            onClick={() => onNew(chapter)}
+            className="w-full bg-duo active:bg-duo-dark hover:bg-duo-dark text-white font-display font-extrabold text-2xl rounded-3xl py-10 shadow-[0_5px_0_#58a700] active:shadow-none active:translate-y-1 transition-all flex flex-col items-center gap-2"
+          >
+            <span style={{ fontSize: 40 }}>📸</span>
+            New
+          </button>
+
+          {/* Revision — grey */}
+          <button
+            onClick={() => onRevision(chapter, exams)}
+            disabled={exams.length === 0}
+            className="w-full bg-gray-100 active:bg-gray-200 hover:bg-gray-200 disabled:opacity-40 text-gray-500 font-display font-extrabold text-2xl rounded-3xl py-10 shadow-[0_5px_0_#d1d5db] active:shadow-none active:translate-y-1 transition-all flex flex-col items-center gap-2 disabled:cursor-not-allowed"
+          >
+            <span style={{ fontSize: 40 }}>📋</span>
+            Revision
+            {exams.length === 0 && (
+              <span className="font-body font-normal text-sm text-gray-400">No exams yet</span>
+            )}
+          </button>
+        </div>
+
+        {/* Recent exams */}
+        {!loading && exams.length > 0 && (
+          <div className="mt-8">
+            <p className="font-body font-bold text-xs text-muted uppercase tracking-widest mb-3">
+              Recent exams
+            </p>
+            <div className="flex flex-col gap-3">
+              {exams.slice(0, 3).map(exam => (
+                <ExamRow key={exam.id} exam={exam} />
+              ))}
+              {exams.length > 3 && (
+                <p className="text-center text-muted font-body text-sm">
+                  +{exams.length - 3} more in Revision
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
