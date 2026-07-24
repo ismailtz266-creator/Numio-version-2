@@ -1,26 +1,28 @@
 const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-exam`
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
+// Max dimensions before sending to Claude.
+// 1200px keeps all text readable while cutting token cost significantly.
+const MAX_PX = 1200
+const JPEG_QUALITY = 0.85 // 85% quality — visually identical, much smaller
+
 /**
- * Takes a File object from the image picker,
- * converts it to base64, sends it to the Edge Function,
- * and returns the exam JSON from Claude.
+ * Main function:
+ * 1. Compress the image (resize + re-encode as JPEG)
+ * 2. Convert to base64
+ * 3. POST to Supabase Edge Function
+ * 4. Return the exam JSON from Claude
  */
 export async function generateExam(imageFile) {
-  // 1. Convert image file to base64 string
-  const base64 = await fileToBase64(imageFile)
+  const { base64, mediaType } = await compressImage(imageFile)
 
-  // 2. POST to Supabase Edge Function
   const response = await fetch(EDGE_FUNCTION_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${ANON_KEY}`,
     },
-    body: JSON.stringify({
-      image: base64,
-      mediaType: imageFile.type, // e.g. "image/jpeg", "image/png"
-    }),
+    body: JSON.stringify({ image: base64, mediaType }),
   })
 
   if (!response.ok) {
@@ -28,24 +30,50 @@ export async function generateExam(imageFile) {
     throw new Error(`Edge Function error: ${error}`)
   }
 
-  const exam = await response.json()
-  return exam
+  return response.json()
 }
 
 /**
- * Converts a File to a base64 data string (without the data:image/...;base64, prefix).
- * Claude API expects raw base64, not the full data URL.
+ * Compresses an image File:
+ * - Draws it onto a canvas scaled to MAX_PX on the longest side
+ * - Re-encodes as JPEG at JPEG_QUALITY
+ * - Returns { base64, mediaType }
  */
-function fileToBase64(file) {
+function compressImage(file) {
   return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      // result is "data:image/jpeg;base64,/9j/4AAQ..."
-      // We strip the prefix, Claude just wants the raw base64 part
-      const base64 = reader.result.split(',')[1]
-      resolve(base64)
+    const img = new Image()
+    const objectUrl = URL.createObjectURL(file)
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl)
+
+      // Calculate new dimensions keeping aspect ratio
+      let { width, height } = img
+      if (width > MAX_PX || height > MAX_PX) {
+        if (width >= height) {
+          height = Math.round((height / width) * MAX_PX)
+          width = MAX_PX
+        } else {
+          width = Math.round((width / height) * MAX_PX)
+          height = MAX_PX
+        }
+      }
+
+      // Draw onto canvas at new size
+      const canvas = document.createElement('canvas')
+      canvas.width  = width
+      canvas.height = height
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, width, height)
+
+      // Export as JPEG base64 (strips the data:image/jpeg;base64, prefix)
+      const dataUrl = canvas.toDataURL('image/jpeg', JPEG_QUALITY)
+      const base64  = dataUrl.split(',')[1]
+
+      resolve({ base64, mediaType: 'image/jpeg' })
     }
-    reader.onerror = reject
-    reader.readAsDataURL(file)
+
+    img.onerror = reject
+    img.src = objectUrl
   })
 }
