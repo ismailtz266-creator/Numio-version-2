@@ -4,9 +4,10 @@ import { saveExam } from '../lib/chapters'
 
 export default function Home({ chapter, onExamReady, onBack }) {
   const fileInputRef = useRef(null)
-  const [status, setStatus] = useState('idle') // 'idle' | 'loading' | 'error'
-  const [error, setError]   = useState(null)
+  const [status, setStatus]   = useState('idle')
+  const [error, setError]     = useState(null)
   const [preview, setPreview] = useState(null)
+  const [inputKey, setInputKey] = useState(0) // forces input remount on each scan
 
   async function handleImageSelected(e) {
     const file = e.target.files[0]
@@ -19,16 +20,12 @@ export default function Home({ chapter, onExamReady, onBack }) {
     try {
       const exam = await generateExam(file)
       console.log('✅ Fresh exam from Claude:', exam.topic, exam.questions?.length, 'questions')
-
-      // Save to DB under this chapter
-      const saved = await saveExam({
+      onExamReady(exam)
+      saveExam({
         chapterId: chapter.id,
         topic: exam.topic,
         questions: exam.questions,
-      })
-
-      // Pass full exam object (with DB id) up to App
-      onExamReady({ ...exam, id: saved.id })
+      }).catch(err => console.error('Failed to save exam to DB:', err))
     } catch (err) {
       console.error('❌ Error:', err)
       setError(err.message)
@@ -40,16 +37,19 @@ export default function Home({ chapter, onExamReady, onBack }) {
     setStatus('idle')
     setError(null)
     setPreview(null)
-    if (fileInputRef.current) fileInputRef.current.value = ''
+    setInputKey(k => k + 1) // remount the input = fully cleared
+  }
+
+  function handleScanClick() {
+    setInputKey(k => k + 1) // remount before every scan = no cache
+    // Small timeout so the new input is in the DOM before we click it
+    setTimeout(() => fileInputRef.current?.click(), 10)
   }
 
   return (
     <div className="bg-white flex flex-col" style={{ height: '100dvh' }}>
-
-      {/* Constrained wrapper */}
       <div className="w-full max-w-lg mx-auto px-5 flex flex-col flex-1">
 
-        {/* Back */}
         <button
           onClick={onBack}
           className="flex-shrink-0 text-muted font-body font-bold text-sm mt-12 mb-6 flex items-center gap-1 active:opacity-60 self-start"
@@ -57,7 +57,6 @@ export default function Home({ chapter, onExamReady, onBack }) {
           ← Back
         </button>
 
-        {/* Header */}
         <div className="flex-shrink-0 text-center mb-8">
           <span style={{ fontSize: 52 }}>{chapter.emoji}</span>
           <h1 className="font-display font-extrabold text-3xl text-ink tracking-tight mt-2">
@@ -68,18 +67,16 @@ export default function Home({ chapter, onExamReady, onBack }) {
           </p>
         </div>
 
-        {/* Image preview */}
         {preview && (
           <div className="flex-shrink-0 mb-6 w-full rounded-2xl overflow-hidden border-2 border-gray-100 shadow-sm max-h-64">
             <img src={preview} alt="Selected" className="w-full h-full object-cover" />
           </div>
         )}
 
-        {/* States */}
         <div className="flex-1 flex flex-col items-center justify-center gap-4 pb-10">
           {status === 'idle' && (
             <button
-              onClick={() => fileInputRef.current?.click()}
+              onClick={handleScanClick}
               className="w-full bg-duo active:bg-duo-dark hover:bg-duo-dark text-white font-display font-bold text-lg rounded-2xl py-5 shadow-[0_4px_0_#58a700] active:shadow-none active:translate-y-1 transition-all"
             >
               📸 Take Photo or Select
@@ -111,7 +108,9 @@ export default function Home({ chapter, onExamReady, onBack }) {
         </div>
       </div>
 
+      {/* Key forces full remount every scan — kills any browser file cache */}
       <input
+        key={inputKey}
         ref={fileInputRef}
         type="file"
         accept="image/*"
