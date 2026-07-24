@@ -138,9 +138,20 @@ export default function Quiz({ exam, onDone }) {
   const total         = questions.length
   const progressScale = (idx + (revealed ? 1 : 0)) / Math.max(total, 1)
 
-  // Check if the current answer is correct
+  // Normalize: lowercase, remove articles, accents, plural s
+  function normalize(str) {
+    return (str || "")
+      .trim()
+      .toLowerCase()
+      .normalize("NFD").replace(/[̀-ͯ]/g, "") // remove accents
+      .replace(/^(les|des|un|une|le|la|l'|the|a|an)\s+/i, "") // remove articles
+      .replace(/s$/, "") // remove trailing s for plural
+      .trim()
+  }
+
+  // Fuzzy match — ignores articles, accents, plural
   function checkCorrect(answer) {
-    return answer?.trim().toLowerCase() === q.correct_answer?.trim().toLowerCase()
+    return normalize(answer) === normalize(q.correct_answer)
   }
 
   const isCorrect = revealed && checkCorrect(selected)
