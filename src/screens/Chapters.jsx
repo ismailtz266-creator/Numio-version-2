@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 import { getChapters, createChapter } from '../lib/chapters'
 
-const MASCOTS = [
-  { id: '1', src: '/mascot-c1.png' },
-  { id: '2', src: '/mascot-c2.png' },
-  { id: '3', src: '/mascot-c3.png' },
-  { id: '4', src: '/mascot-c4.png' },
+const EMOJI_OPTIONS = [
+  '📐','📖','🔬','🌍','🎨','🎵','🏃','💻','🧮','📝',
+  '🦋','🌿','⚗️','🗺️','🎭','📚','🧠','🔭','🏛️','✏️',
+  '🧪','🌊','🦁','🎯','🧩','🌸','⚽','🎸','🍎','🚀',
 ]
 
 const BANNER_COLORS = [
@@ -19,10 +18,6 @@ const BANNER_COLORS = [
   { bg: '#fee2e2', border: '#fca5a5' },
 ]
 
-function getMascotSrc(emojiField) {
-  const found = MASCOTS.find(m => m.id === emojiField)
-  return found ? found.src : '/mascot-c1.png'
-}
 
 export default function Chapters({ onSelectChapter }) {
   const [chapters, setChapters] = useState([])
@@ -42,9 +37,9 @@ export default function Chapters({ onSelectChapter }) {
     }
   }
 
-  async function handleCreate(name, mascotId) {
+  async function handleCreate(name, emoji) {
     try {
-      const chapter = await createChapter({ name, emoji: mascotId })
+      const chapter = await createChapter({ name, emoji })
       setChapters(prev => [...prev, chapter])
       setShowModal(false)
     } catch (err) {
@@ -136,7 +131,6 @@ function SpeechBubble({ text }) {
 
 function ChapterCard({ chapter, colorIndex, onClick }) {
   const color = BANNER_COLORS[colorIndex % BANNER_COLORS.length]
-  const mascotSrc = getMascotSrc(chapter.emoji)
 
   return (
     <button
@@ -149,23 +143,10 @@ function ChapterCard({ chapter, colorIndex, onClick }) {
     >
       {/* Banner */}
       <div
-        className="relative overflow-hidden"
+        className="relative flex items-center justify-center"
         style={{ background: color.bg, height: 140 }}
       >
-        {/* Mascot — 1/3 cut off bottom and right */}
-        <img
-          src={mascotSrc}
-          alt="mascot"
-          style={{
-            position: 'absolute',
-            bottom: -47,
-            right: -38,
-            height: 170,
-            width: 'auto',
-            objectFit: 'contain',
-            zIndex: 1,
-          }}
-        />
+        <span style={{ fontSize: 72 }}>{chapter.emoji}</span>
       </div>
 
       {/* Card body */}
@@ -180,7 +161,7 @@ function ChapterCard({ chapter, colorIndex, onClick }) {
 function EmptyState({ onAdd }) {
   return (
     <div className="flex flex-col items-center justify-center pt-20 gap-6 text-center px-4">
-      <img src="/mascot-c4.png" alt="Numio" className="w-32 h-auto" />
+      <span style={{ fontSize: 72 }}>📭</span>
       <div>
         <p className="font-display font-extrabold text-2xl text-ink">No chapters yet</p>
         <p className="text-muted font-body text-base mt-2">
@@ -198,14 +179,14 @@ function EmptyState({ onAdd }) {
 }
 
 function ChapterModal({ onConfirm, onClose }) {
-  const [name, setName]         = useState('')
-  const [mascotId, setMascotId] = useState('1')
-  const [saving, setSaving]     = useState(false)
+  const [name, setName]     = useState('')
+  const [emoji, setEmoji]   = useState('📐')
+  const [saving, setSaving] = useState(false)
 
   async function handleSubmit() {
     if (!name.trim()) return
     setSaving(true)
-    await onConfirm(name.trim(), mascotId)
+    await onConfirm(name.trim(), emoji)
     setSaving(false)
   }
 
@@ -242,56 +223,32 @@ function ChapterModal({ onConfirm, onClose }) {
             />
           </div>
 
-          {/* Mascot picker */}
-          <div className="flex flex-col gap-3">
+          {/* Emoji picker */}
+          <div className="flex flex-col gap-2">
             <label className="font-body font-bold text-xs text-muted uppercase tracking-widest">
-              Pick your mascot
+              Pick an icon
             </label>
-            <div className="grid grid-cols-4 gap-3">
-              {MASCOTS.map(m => (
+            <div className="grid grid-cols-6 gap-2">
+              {EMOJI_OPTIONS.map(e => (
                 <button
-                  key={m.id}
-                  onClick={() => setMascotId(m.id)}
-                  className="flex flex-col items-center justify-end rounded-2xl border-2 transition-all overflow-hidden"
-                  style={{
-                    height: 72,
-                    borderColor: mascotId === m.id ? '#58cc02' : '#e5e7eb',
-                    background: mascotId === m.id ? '#f0fdf4' : '#f9fafb',
-                    paddingTop: 6,
-                  }}
+                  key={e}
+                  onClick={() => setEmoji(e)}
+                  className={`h-11 w-full rounded-xl text-xl flex items-center justify-center border-2 transition-all ${
+                    emoji === e ? 'border-duo bg-green-50' : 'border-gray-100 bg-gray-50'
+                  }`}
                 >
-                  <img
-                    src={m.src}
-                    alt=""
-                    style={{ height: 54, width: 'auto', objectFit: 'contain' }}
-                  />
+                  {e}
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Live preview */}
-          <div className="flex flex-col gap-2">
-            <label className="font-body font-bold text-xs text-muted uppercase tracking-widest">
-              Preview
-            </label>
-            <div
-              className="relative rounded-2xl overflow-hidden"
-              style={{ height: 110, background: '#e0f2fe' }}
-            >
-              <img
-                src={getMascotSrc(mascotId)}
-                alt=""
-                style={{
-                  position: 'absolute',
-                  bottom: -40,
-                  right: -32,
-                  height: 145,
-                  width: 'auto',
-                  objectFit: 'contain',
-                }}
-              />
-            </div>
+          {/* Preview */}
+          <div className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3">
+            <span style={{ fontSize: 28 }}>{emoji}</span>
+            <span className="font-display font-bold text-lg text-ink">
+              {name || 'Chapter name...'}
+            </span>
           </div>
 
           {/* CTA */}
