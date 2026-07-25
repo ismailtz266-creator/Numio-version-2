@@ -101,9 +101,62 @@ function ChapterCard({ chapter, colorIndex, onClick }) {
         boxShadow: `0 4px 0 ${color.border}`,
       }}
     >
-      <div className="h-28 flex items-center justify-center" style={{ background: color.bg }}>
-        <span style={{ fontSize: 56 }}>{chapter.emoji}</span>
+      {/* Banner: mascot + speech bubble */}
+      <div
+        className="relative h-28 flex items-end justify-center overflow-hidden"
+        style={{ background: color.bg }}
+      >
+        {/* Speech bubble */}
+        <div style={{
+          position: 'absolute',
+          top: 12,
+          left: 16,
+          background: 'white',
+          borderRadius: 14,
+          padding: '6px 12px',
+          boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+          maxWidth: '65%',
+        }}>
+          <span style={{
+            fontFamily: '"Baloo 2", sans-serif',
+            fontWeight: 800,
+            fontSize: 13,
+            color: '#3c3c3c',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            display: 'block',
+            maxWidth: 120,
+          }}>
+            {chapter.name}
+          </span>
+          {/* Bubble tail */}
+          <div style={{
+            position: 'absolute',
+            bottom: -7,
+            left: 16,
+            width: 0,
+            height: 0,
+            borderLeft: '7px solid transparent',
+            borderRight: '7px solid transparent',
+            borderTop: '8px solid white',
+          }} />
+        </div>
+
+        {/* Mascot */}
+        <img
+          src="/mascot.png"
+          alt="Numio"
+          style={{
+            height: 80,
+            width: 'auto',
+            objectFit: 'contain',
+            position: 'relative',
+            zIndex: 1,
+          }}
+        />
       </div>
+
       <div className="px-5 py-4">
         <p className="font-display font-extrabold text-xl text-ink">{chapter.name}</p>
         <p className="font-body text-sm text-muted mt-0.5">Tap to study →</p>
