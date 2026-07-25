@@ -152,20 +152,15 @@ function ChapterCard({ chapter, colorIndex, onClick }) {
         className="relative overflow-hidden"
         style={{ background: color.bg, height: 140 }}
       >
-        {/* Speech bubble — top left */}
-        <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 2 }}>
-          <SpeechBubble text={chapter.name} />
-        </div>
-
-        {/* Mascot — big, bottom-right, partially cut */}
+        {/* Mascot — 1/3 cut off bottom and right */}
         <img
           src={mascotSrc}
           alt="mascot"
           style={{
             position: 'absolute',
-            bottom: -14,
-            right: -8,
-            height: 140,
+            bottom: -55,
+            right: -45,
+            height: 200,
             width: 'auto',
             objectFit: 'contain',
             zIndex: 1,
