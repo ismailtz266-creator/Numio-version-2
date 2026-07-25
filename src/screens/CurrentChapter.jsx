@@ -90,7 +90,6 @@ export default function CurrentChapter({ chapter, onNew, onRevision, onBack }) {
             </div>
           </div>
         )}
-        </div>
       </div>
     </div>
   )
