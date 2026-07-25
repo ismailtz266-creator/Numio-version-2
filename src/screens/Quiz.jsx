@@ -1,5 +1,6 @@
 import { useState } from 'react'
-import { addCoins } from '../lib/economy'
+import { addCoins, updateStreak } from '../lib/economy'
+import StreakPopup from './StreakPopup'
 
 const COINS_PER_QUIZ = 20
 
@@ -201,6 +202,8 @@ export default function Quiz({ exam, onDone }) {
   const [answers,     setAnswers]     = useState([])
   const [showQuit,    setShowQuit]    = useState(false)
   const [showResults, setShowResults] = useState(false)
+  const [showStreak,  setShowStreak]  = useState(false)
+  const [streakCount, setStreakCount] = useState(0)
   const [typedValue,  setTypedValue]  = useState('')
   const [saving,      setSaving]      = useState(false)
 
@@ -220,11 +223,22 @@ export default function Quiz({ exam, onDone }) {
     setAnswers(newAnswers)
 
     if (idx === total - 1) {
-      // Last question — award coins then show results
+      // Last question — award coins + update streak, then show results
       setSaving(true)
-      try { await addCoins(COINS_PER_QUIZ) } catch (e) { console.error('Coin error:', e) }
+      try {
+        await addCoins(COINS_PER_QUIZ)
+        const { streakCount: sc, isNewDay } = await updateStreak()
+        if (isNewDay) {
+          setStreakCount(sc)
+          setShowStreak(true)
+        } else {
+          setShowResults(true)
+        }
+      } catch (e) {
+        console.error('End of quiz error:', e)
+        setShowResults(true)
+      }
       setSaving(false)
-      setShowResults(true)
       return
     }
 
@@ -239,6 +253,15 @@ export default function Quiz({ exam, onDone }) {
     if (!answer && answer !== false) return
     setSelected(q.type === 'fill_blank' ? typedValue : selected)
     setRevealed(true)
+  }
+
+  if (showStreak) {
+    return (
+      <StreakPopup
+        streakCount={streakCount}
+        onClose={() => { setShowStreak(false); setShowResults(true) }}
+      />
+    )
   }
 
   if (showResults) {
