@@ -7,6 +7,18 @@ const EMOJI_OPTIONS = [
   '🧪','🌊','🦁','🎯','🧩','🌸','⚽','🎸','🍎','🚀',
 ]
 
+// Per-chapter banner colors — cycles through if more than 8 chapters
+const BANNER_COLORS = [
+  { bg: '#e0f2fe', border: '#bae6fd' }, // sky
+  { bg: '#fce7f3', border: '#fbcfe8' }, // pink
+  { bg: '#dcfce7', border: '#bbf7d0' }, // green
+  { bg: '#fef9c3', border: '#fef08a' }, // yellow
+  { bg: '#ede9fe', border: '#ddd6fe' }, // purple
+  { bg: '#ffedd5', border: '#fed7aa' }, // orange
+  { bg: '#ccfbf1', border: '#99f6e4' }, // teal
+  { bg: '#fee2e2', border: '#fecaca' }, // red
+]
+
 export default function Chapters({ onSelectChapter }) {
   const [chapters, setChapters]   = useState([])
   const [loading, setLoading]     = useState(true)
@@ -40,26 +52,19 @@ export default function Chapters({ onSelectChapter }) {
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ height: '100dvh' }}>
 
-      {/* Header */}
-      <div className="flex-shrink-0 px-5 pt-12 pb-4">
-        <div className="max-w-2xl mx-auto">
-          <h1 className="font-display font-extrabold text-3xl text-ink">My Chapters</h1>
-          <p className="text-muted font-body text-sm mt-1">Pick a subject to study 📚</p>
-        </div>
-      </div>
-
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto px-5 pb-10">
+      <div className="flex-1 overflow-y-auto px-5 pt-12 pb-10">
         <div className="max-w-2xl mx-auto">
           {chapters.length === 0 ? (
             <EmptyState onAdd={() => setShowModal(true)} />
           ) : (
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {chapters.map(chapter => (
+                {chapters.map((chapter, index) => (
                   <ChapterCard
                     key={chapter.id}
                     chapter={chapter}
+                    colorIndex={index}
                     onClick={() => onSelectChapter(chapter)}
                   />
                 ))}
@@ -68,7 +73,7 @@ export default function Chapters({ onSelectChapter }) {
                 onClick={() => setShowModal(true)}
                 className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-muted font-display font-bold text-base active:bg-gray-50 hover:bg-gray-50 transition-colors"
               >
-                + Add more chapters
+                + Add chapter
               </button>
             </div>
           )}
@@ -85,14 +90,19 @@ export default function Chapters({ onSelectChapter }) {
   )
 }
 
-function ChapterCard({ chapter, onClick }) {
+function ChapterCard({ chapter, colorIndex, onClick }) {
+  const color = BANNER_COLORS[colorIndex % BANNER_COLORS.length]
   return (
     <button
       onClick={onClick}
-      className="w-full text-left rounded-3xl border-2 border-gray-100 bg-white shadow-sm active:scale-[0.98] transition-transform overflow-hidden"
+      className="w-full text-left rounded-3xl bg-white overflow-hidden transition-all active:translate-y-1"
+      style={{
+        border: `2px solid ${color.border}`,
+        boxShadow: `0 4px 0 ${color.border}`,
+      }}
     >
-      <div className="h-24 bg-blue-50 flex items-center justify-center">
-        <span style={{ fontSize: 52 }}>{chapter.emoji}</span>
+      <div className="h-28 flex items-center justify-center" style={{ background: color.bg }}>
+        <span style={{ fontSize: 56 }}>{chapter.emoji}</span>
       </div>
       <div className="px-5 py-4">
         <p className="font-display font-extrabold text-xl text-ink">{chapter.name}</p>
