@@ -278,7 +278,7 @@ export default function Quiz({ exam, onDone }) {
   if (!q) return null
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="flex items-center justify-center bg-white" style={{ height: '100dvh', overflow: 'hidden' }}>
       <QuitPopup
         visible={showQuit}
         onStay={() => setShowQuit(false)}
@@ -306,16 +306,16 @@ export default function Quiz({ exam, onDone }) {
 
         {/* Topic */}
         <div className="flex-shrink-0 px-5 pt-2 pb-1">
-          <p className="font-body font-bold text-xs tracking-widest uppercase text-duo">{topic}</p>
+          <p className="font-body font-bold text-xs tracking-widest uppercase text-duo truncate">{topic}</p>
         </div>
 
-        {/* Question */}
-        <div className="flex-shrink-0 px-6 pt-4 pb-3">
+        {/* Question — capped height, scrollable if too long */}
+        <div className="flex-shrink-0 px-6 pt-4 pb-3" style={{ maxHeight: '30%', overflowY: 'auto' }}>
           <p className="font-display font-bold text-2xl text-ink leading-snug">{q.question}</p>
         </div>
 
-        {/* Answers */}
-        <div className="flex-shrink-0 px-4 mt-2 flex-1">
+        {/* Answers — flex-1 so it fills remaining space */}
+        <div className="px-4 mt-2 flex-1 overflow-y-auto">
           {q.type === 'mcq' && (
             <div className="flex flex-col gap-3">
               {q.options.map(option => (
@@ -370,7 +370,8 @@ export default function Quiz({ exam, onDone }) {
             <button
               disabled={q.type === 'fill_blank' ? typedValue.trim() === '' : selected === null}
               onClick={handleCheck}
-              className="w-full bg-duo active:bg-duo-dark disabled:opacity-40 text-white font-display font-bold text-xl rounded-2xl py-5 shadow-[0_4px_0_#58a700] active:shadow-none active:translate-y-1 transition-all tracking-widest"
+              className="w-full bg-duo disabled:opacity-40 text-white font-display font-bold text-xl rounded-2xl py-5 transition-all tracking-widest active:translate-y-1"
+              style={{ boxShadow: '0 4px 0 #46a302' }}
             >
               CHECK
             </button>
@@ -385,7 +386,8 @@ export default function Quiz({ exam, onDone }) {
               <button
                 onClick={handleContinue}
                 disabled={saving}
-                className={`w-full py-4 font-display font-bold text-xl tracking-widest text-white ${isCorrect ? 'bg-duo' : 'bg-amber-400'}`}
+                className={`w-full py-4 font-display font-bold text-xl tracking-widest text-white active:translate-y-0.5 transition-all ${isCorrect ? 'bg-duo' : 'bg-amber-400'}`}
+                style={{ boxShadow: isCorrect ? '0 4px 0 #46a302' : '0 4px 0 #d97706' }}
               >
                 {saving ? 'Saving...' : 'CONTINUE →'}
               </button>
