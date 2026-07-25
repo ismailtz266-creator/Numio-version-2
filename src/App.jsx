@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ensureAuth } from './lib/auth'
+import Onboarding from './screens/Onboarding'
 import { getStreak } from './lib/economy'
 import Nav from './components/Nav'
 import Chapters from './screens/Chapters'
@@ -16,6 +17,7 @@ const HIDE_NAV = ['quiz', 'scan', 'quiz_intro']
 export default function App() {
   const [authReady, setAuthReady] = useState(false)
   const [streak, setStreak] = useState(0)
+  const [onboarded, setOnboarded] = useState(null) // null=checking, true, false
   const [tab, setTab]             = useState('chapters')
 
   // Single nav state object — screen + all associated data
@@ -28,16 +30,40 @@ export default function App() {
   })
 
   useEffect(() => {
-    ensureAuth().then(() => {
-      getStreak().then(s => setStreak(s.count)).catch(() => {})
+    ensureAuth().then(async () => {
+      try {
+        const { data: { user } } = await (await import('./lib/supabaseClient')).supabase.auth.getUser()
+        if (!user || user.is_anonymous) {
+          setOnboarded(false)
+          return
+        }
+        // Check if profile has display_name
+        const { supabase } = await import('./lib/supabaseClient')
+        const { data } = await supabase.from('profiles').select('display_name').eq('id', user.id).single()
+        setOnboarded(!!data?.display_name)
+        if (data?.display_name) {
+          getStreak().then(s => setStreak(s.count)).catch(() => {})
+        }
+      } catch {
+        setOnboarded(false)
+      }
     }).finally(() => setAuthReady(true))
   }, [])
 
-  if (!authReady) {
+  if (!authReady || onboarded === null) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-12 h-12 rounded-full border-4 border-gray-100 border-t-duo animate-spin" />
       </div>
+    )
+  }
+
+  if (!onboarded) {
+    return (
+      <Onboarding onComplete={() => {
+        setOnboarded(true)
+        getStreak().then(s => setStreak(s.count)).catch(() => {})
+      }} />
     )
   }
 
