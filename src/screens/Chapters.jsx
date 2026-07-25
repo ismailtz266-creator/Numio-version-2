@@ -143,15 +143,17 @@ function ChapterCard({ chapter, colorIndex, onClick }) {
           }} />
         </div>
 
-        {/* Mascot */}
+        {/* Mascot — big, bottom-right, partially cropped */}
         <img
           src="/mascot.png"
           alt="Numio"
           style={{
-            height: 80,
+            position: 'absolute',
+            bottom: -10,
+            right: -10,
+            height: 110,
             width: 'auto',
             objectFit: 'contain',
-            position: 'relative',
             zIndex: 1,
           }}
         />
