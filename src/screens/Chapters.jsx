@@ -113,20 +113,23 @@ function ChapterCard({ chapter, colorIndex, onClick }) {
         className="relative overflow-hidden"
         style={{ background: color.bg, height: 140 }}
       >
-        {/* Chapter name overlaid on the bubble that's part of the mascot image */}
+        {/* Chapter name overlaid inside the bubble in the mascot image */}
         <span style={{
           position: 'absolute',
-          top: 22,
-          right: 24,
+          top: 28,
+          right: 20,
           fontFamily: '"Baloo 2", sans-serif',
-          fontWeight: 800,
-          fontSize: 15,
+          fontWeight: 700,
+          fontSize: 12,
           color: '#3c3c3c',
           zIndex: 2,
-          maxWidth: '55%',
+          maxWidth: 110,
+          width: 110,
+          textAlign: 'center',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
+          display: 'block',
         }}>
           {chapter.name}
         </span>
