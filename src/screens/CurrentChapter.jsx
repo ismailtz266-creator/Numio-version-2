@@ -19,10 +19,8 @@ export default function CurrentChapter({ chapter, onNew, onRevision, onBack }) {
   }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
-
-      {/* Constrained container */}
-      <div className="w-full max-w-2xl mx-auto px-5">
+    <div className="bg-white flex flex-col" style={{ height: '100dvh', overflow: 'hidden' }}>
+      <div className="w-full max-w-2xl mx-auto px-5 flex flex-col flex-1 overflow-y-auto pb-10">
 
         {/* Header */}
         <div className="pt-12 pb-6">
@@ -64,11 +62,7 @@ export default function CurrentChapter({ chapter, onNew, onRevision, onBack }) {
             onClick={() => onRevision(chapter, exams)}
             disabled={exams.length === 0}
             className="w-full bg-gray-100 disabled:opacity-40 text-gray-500 font-display font-extrabold text-2xl rounded-3xl py-10 transition-all flex flex-col items-center gap-2 disabled:cursor-not-allowed active:translate-y-1"
-            style={{ boxShadow: '0 5px 0 #d1d5db' }}
-            onMouseDown={e => !e.currentTarget.disabled && (e.currentTarget.style.boxShadow = 'none')}
-            onMouseUp={e => e.currentTarget.style.boxShadow = '0 5px 0 #d1d5db'}
-            onTouchStart={e => !e.currentTarget.disabled && (e.currentTarget.style.boxShadow = 'none')}
-            onTouchEnd={e => e.currentTarget.style.boxShadow = '0 5px 0 #d1d5db'}
+            style={{ boxShadow: exams.length === 0 ? 'none' : '0 5px 0 #d1d5db' }}
           >
             <span style={{ fontSize: 40 }}>📋</span>
             Revision
@@ -96,6 +90,7 @@ export default function CurrentChapter({ chapter, onNew, onRevision, onBack }) {
             </div>
           </div>
         )}
+        </div>
       </div>
     </div>
   )
