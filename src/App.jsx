@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ensureAuth } from './lib/auth'
+import { getStreak } from './lib/economy'
 import Nav from './components/Nav'
 import Chapters from './screens/Chapters'
 import CurrentChapter from './screens/CurrentChapter'
@@ -14,6 +15,7 @@ const HIDE_NAV = ['quiz', 'scan', 'quiz_intro']
 
 export default function App() {
   const [authReady, setAuthReady] = useState(false)
+  const [streak, setStreak] = useState(0)
   const [tab, setTab]             = useState('chapters')
 
   // Single nav state object — screen + all associated data
@@ -26,7 +28,9 @@ export default function App() {
   })
 
   useEffect(() => {
-    ensureAuth().finally(() => setAuthReady(true))
+    ensureAuth().then(() => {
+      getStreak().then(s => setStreak(s.count)).catch(() => {})
+    }).finally(() => setAuthReady(true))
   }, [])
 
   if (!authReady) {
@@ -52,7 +56,7 @@ export default function App() {
 
   return (
     <div className="flex">
-      {showNav && <Nav active={tab} onChange={handleTabChange} />}
+      {showNav && <Nav active={tab} onChange={handleTabChange} streak={streak} />}
 
       <main
         className={`flex-1 ${showNav ? 'md:ml-56' : ''}`}
