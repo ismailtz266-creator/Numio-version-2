@@ -108,3 +108,52 @@ export async function approveClaim(claimId) {
     .eq('id', claimId)
   if (error) throw error
 }
+
+// ── Streak ────────────────────────────────────────────────────────
+
+export async function getStreak() {
+  const profile = await getProfile()
+  return {
+    count: profile?.streak_count || 0,
+    lastDate: profile?.streak_last_date || null,
+  }
+}
+
+/**
+ * Call after every completed quiz.
+ * - If last quiz was yesterday → increment streak
+ * - If last quiz was today → no change
+ * - If last quiz was 2+ days ago → reset to 1
+ * Returns { streakCount, isNewDay, previousStreak }
+ */
+export async function updateStreak() {
+  const { data: { user } } = await supabase.auth.getUser()
+  const profile = await getProfile()
+
+  const today = new Date().toISOString().slice(0, 10) // "2026-07-24"
+  const lastDate = profile?.streak_last_date || null
+  const currentStreak = profile?.streak_count || 0
+
+  // Already completed a quiz today — no change
+  if (lastDate === today) {
+    return { streakCount: currentStreak, isNewDay: false, previousStreak: currentStreak }
+  }
+
+  const yesterday = new Date()
+  yesterday.setDate(yesterday.getDate() - 1)
+  const yesterdayStr = yesterday.toISOString().slice(0, 10)
+
+  let newStreak
+  if (lastDate === yesterdayStr) {
+    newStreak = currentStreak + 1 // consecutive day
+  } else {
+    newStreak = 1 // reset
+  }
+
+  await supabase
+    .from('profiles')
+    .update({ streak_count: newStreak, streak_last_date: today })
+    .eq('id', user.id)
+
+  return { streakCount: newStreak, isNewDay: true, previousStreak: currentStreak }
+}
