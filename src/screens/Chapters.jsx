@@ -158,9 +158,9 @@ function ChapterCard({ chapter, colorIndex, onClick }) {
           alt="mascot"
           style={{
             position: 'absolute',
-            bottom: -55,
-            right: -45,
-            height: 200,
+            bottom: -47,
+            right: -38,
+            height: 170,
             width: 'auto',
             objectFit: 'contain',
             zIndex: 1,
@@ -254,16 +254,16 @@ function ChapterModal({ onConfirm, onClose }) {
                   onClick={() => setMascotId(m.id)}
                   className="flex flex-col items-center justify-end rounded-2xl border-2 transition-all overflow-hidden"
                   style={{
-                    height: 90,
+                    height: 72,
                     borderColor: mascotId === m.id ? '#58cc02' : '#e5e7eb',
                     background: mascotId === m.id ? '#f0fdf4' : '#f9fafb',
-                    paddingTop: 8,
+                    paddingTop: 6,
                   }}
                 >
                   <img
                     src={m.src}
                     alt=""
-                    style={{ height: 70, width: 'auto', objectFit: 'contain' }}
+                    style={{ height: 54, width: 'auto', objectFit: 'contain' }}
                   />
                 </button>
               ))}
@@ -279,17 +279,14 @@ function ChapterModal({ onConfirm, onClose }) {
               className="relative rounded-2xl overflow-hidden"
               style={{ height: 110, background: '#e0f2fe' }}
             >
-              <div style={{ position: 'absolute', top: 14, left: 14, zIndex: 2 }}>
-                <SpeechBubble text={name || 'Chapter name...'} />
-              </div>
               <img
                 src={getMascotSrc(mascotId)}
                 alt=""
                 style={{
                   position: 'absolute',
-                  bottom: -10,
-                  right: -6,
-                  height: 110,
+                  bottom: -40,
+                  right: -32,
+                  height: 145,
                   width: 'auto',
                   objectFit: 'contain',
                 }}
