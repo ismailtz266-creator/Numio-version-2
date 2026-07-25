@@ -116,8 +116,8 @@ function ChapterCard({ chapter, colorIndex, onClick }) {
         {/* Chapter name overlaid on the bubble that's part of the mascot image */}
         <span style={{
           position: 'absolute',
-          top: 18,
-          left: 20,
+          top: 22,
+          right: 24,
           fontFamily: '"Baloo 2", sans-serif',
           fontWeight: 800,
           fontSize: 15,
