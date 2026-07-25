@@ -72,7 +72,7 @@ export default function ParentZone() {
 
         {/* Kid's balance */}
         <div className="flex-shrink-0 flex items-center gap-3 bg-amber-50 border-2 border-amber-200 rounded-2xl px-5 py-3 mb-5">
-          <CoinIcon size={32} />
+          <CoinIcon size={64} />
           <div>
             <p className="font-body text-xs text-amber-600 font-bold uppercase tracking-widest">Kid's balance</p>
             <p className="font-display font-bold text-xl text-amber-500">{balance} coins</p>
@@ -145,7 +145,8 @@ export default function ParentZone() {
                       <button
                         onClick={() => handleApprove(claim.id)}
                         disabled={approving === claim.id}
-                        className="px-4 py-2 rounded-xl bg-duo text-white font-display font-bold text-sm shadow-[0_3px_0_#58a700] active:shadow-none active:translate-y-0.5"
+                        className="px-4 py-2 rounded-xl bg-duo text-white font-display font-bold text-sm transition-all active:translate-y-0.5"
+                        style={{ boxShadow: '0 3px 0 #46a302' }}
                       >
                         {approving === claim.id ? '...' : 'Approve ✓'}
                       </button>
