@@ -76,7 +76,7 @@ export default function Onboarding({ onComplete }) {
       const fakeEmail = `${phone.replace(/\s+/g, '')}@numio.app`
       const { error } = await supabase.auth.signUp({
         email: fakeEmail,
-        password: pin,
+        password: pin + pin.slice(0, 2), // pad to 6 chars — Supabase minimum
       })
       if (error) throw error
       setScreen('graffiti')
