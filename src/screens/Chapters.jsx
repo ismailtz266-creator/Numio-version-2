@@ -1,34 +1,32 @@
 import { useState, useEffect } from 'react'
 import { getChapters, createChapter } from '../lib/chapters'
 
-// 4 mascot variants — stored as '1','2','3','4' in the emoji column
 const MASCOTS = [
-  { id: '1', src: '/mascot-chapter1.png', label: 'Peeking' },
-  { id: '2', src: '/mascot-chapter2.png', label: 'Curious' },
-  { id: '3', src: '/mascot-chapter3.png', label: 'Growing' },
-  { id: '4', src: '/mascot-chapter4.png', label: 'Standing' },
+  { id: '1', src: '/mascot-c1.png' },
+  { id: '2', src: '/mascot-c2.png' },
+  { id: '3', src: '/mascot-c3.png' },
+  { id: '4', src: '/mascot-c4.png' },
 ]
 
-// Per-chapter banner colors — cycles if more than 8 chapters
 const BANNER_COLORS = [
-  { bg: '#e0f2fe', border: '#7dd3fc' }, // sky
-  { bg: '#fce7f3', border: '#f9a8d4' }, // pink
-  { bg: '#dcfce7', border: '#86efac' }, // green
-  { bg: '#fef9c3', border: '#fde047' }, // yellow
-  { bg: '#ede9fe', border: '#c4b5fd' }, // purple
-  { bg: '#ffedd5', border: '#fdba74' }, // orange
-  { bg: '#ccfbf1', border: '#5eead4' }, // teal
-  { bg: '#fee2e2', border: '#fca5a5' }, // red
+  { bg: '#e0f2fe', border: '#7dd3fc' },
+  { bg: '#fce7f3', border: '#f9a8d4' },
+  { bg: '#dcfce7', border: '#86efac' },
+  { bg: '#fef9c3', border: '#fde047' },
+  { bg: '#ede9fe', border: '#c4b5fd' },
+  { bg: '#ffedd5', border: '#fdba74' },
+  { bg: '#ccfbf1', border: '#5eead4' },
+  { bg: '#fee2e2', border: '#fca5a5' },
 ]
 
 function getMascotSrc(emojiField) {
   const found = MASCOTS.find(m => m.id === emojiField)
-  return found ? found.src : '/mascot-chapter1.png'
+  return found ? found.src : '/mascot-c1.png'
 }
 
 export default function Chapters({ onSelectChapter }) {
-  const [chapters, setChapters]   = useState([])
-  const [loading, setLoading]     = useState(true)
+  const [chapters, setChapters] = useState([])
+  const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
 
   useEffect(() => { loadChapters() }, [])
@@ -95,6 +93,47 @@ export default function Chapters({ onSelectChapter }) {
   )
 }
 
+function SpeechBubble({ text }) {
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      {/* Bubble body */}
+      <div style={{
+        background: 'white',
+        borderRadius: 14,
+        padding: '7px 14px',
+        boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
+        maxWidth: 150,
+      }}>
+        <span style={{
+          fontFamily: '"Baloo 2", sans-serif',
+          fontWeight: 800,
+          fontSize: 14,
+          color: '#3c3c3c',
+          whiteSpace: 'nowrap',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          display: 'block',
+          maxWidth: 130,
+        }}>
+          {text}
+        </span>
+      </div>
+      {/* Tail pointing down-left toward mascot */}
+      <div style={{
+        position: 'absolute',
+        bottom: -8,
+        left: 18,
+        width: 0,
+        height: 0,
+        borderLeft: '8px solid transparent',
+        borderRight: '8px solid transparent',
+        borderTop: '9px solid white',
+        filter: 'drop-shadow(0 2px 2px rgba(0,0,0,0.06))',
+      }} />
+    </div>
+  )
+}
+
 function ChapterCard({ chapter, colorIndex, onClick }) {
   const color = BANNER_COLORS[colorIndex % BANNER_COLORS.length]
   const mascotSrc = getMascotSrc(chapter.emoji)
@@ -113,36 +152,20 @@ function ChapterCard({ chapter, colorIndex, onClick }) {
         className="relative overflow-hidden"
         style={{ background: color.bg, height: 140 }}
       >
-        {/* Chapter name overlaid inside the bubble in the mascot image */}
-        <span style={{
-          position: 'absolute',
-          top: 28,
-          right: 20,
-          fontFamily: '"Baloo 2", sans-serif',
-          fontWeight: 700,
-          fontSize: 12,
-          color: '#3c3c3c',
-          zIndex: 2,
-          maxWidth: 110,
-          width: 110,
-          textAlign: 'center',
-          overflow: 'hidden',
-          textOverflow: 'ellipsis',
-          whiteSpace: 'nowrap',
-          display: 'block',
-        }}>
-          {chapter.name}
-        </span>
+        {/* Speech bubble — top left */}
+        <div style={{ position: 'absolute', top: 16, left: 16, zIndex: 2 }}>
+          <SpeechBubble text={chapter.name} />
+        </div>
 
-        {/* Mascot — big, bottom-right, partially cut off */}
+        {/* Mascot — big, bottom-right, partially cut */}
         <img
           src={mascotSrc}
-          alt="Numio mascot"
+          alt="mascot"
           style={{
             position: 'absolute',
-            bottom: -12,
+            bottom: -14,
             right: -8,
-            height: 130,
+            height: 140,
             width: 'auto',
             objectFit: 'contain',
             zIndex: 1,
@@ -162,7 +185,7 @@ function ChapterCard({ chapter, colorIndex, onClick }) {
 function EmptyState({ onAdd }) {
   return (
     <div className="flex flex-col items-center justify-center pt-20 gap-6 text-center px-4">
-      <img src="/mascot-chapter4.png" alt="Numio" className="w-32 h-auto" />
+      <img src="/mascot-c4.png" alt="Numio" className="w-32 h-auto" />
       <div>
         <p className="font-display font-extrabold text-2xl text-ink">No chapters yet</p>
         <p className="text-muted font-body text-base mt-2">
@@ -180,9 +203,9 @@ function EmptyState({ onAdd }) {
 }
 
 function ChapterModal({ onConfirm, onClose }) {
-  const [name, setName]       = useState('')
+  const [name, setName]         = useState('')
   const [mascotId, setMascotId] = useState('1')
-  const [saving, setSaving]   = useState(false)
+  const [saving, setSaving]     = useState(false)
 
   async function handleSubmit() {
     if (!name.trim()) return
@@ -234,16 +257,17 @@ function ChapterModal({ onConfirm, onClose }) {
                 <button
                   key={m.id}
                   onClick={() => setMascotId(m.id)}
-                  className={`flex flex-col items-center justify-end rounded-2xl border-2 transition-all overflow-hidden pt-2`}
+                  className="flex flex-col items-center justify-end rounded-2xl border-2 transition-all overflow-hidden"
                   style={{
                     height: 90,
                     borderColor: mascotId === m.id ? '#58cc02' : '#e5e7eb',
                     background: mascotId === m.id ? '#f0fdf4' : '#f9fafb',
+                    paddingTop: 8,
                   }}
                 >
                   <img
                     src={m.src}
-                    alt={m.label}
+                    alt=""
                     style={{ height: 70, width: 'auto', objectFit: 'contain' }}
                   />
                 </button>
@@ -251,35 +275,31 @@ function ChapterModal({ onConfirm, onClose }) {
             </div>
           </div>
 
-          {/* Preview */}
-          <div
-            className="relative rounded-2xl overflow-hidden flex items-end"
-            style={{ height: 100, background: '#e0f2fe' }}
-          >
-            <span style={{
-              position: 'absolute',
-              top: 14,
-              left: 18,
-              fontFamily: '"Baloo 2", sans-serif',
-              fontWeight: 800,
-              fontSize: 14,
-              color: '#3c3c3c',
-              zIndex: 2,
-            }}>
-              {name || 'Chapter name...'}
-            </span>
-            <img
-              src={getMascotSrc(mascotId)}
-              alt=""
-              style={{
-                position: 'absolute',
-                bottom: -8,
-                right: -4,
-                height: 90,
-                width: 'auto',
-                objectFit: 'contain',
-              }}
-            />
+          {/* Live preview */}
+          <div className="flex flex-col gap-2">
+            <label className="font-body font-bold text-xs text-muted uppercase tracking-widest">
+              Preview
+            </label>
+            <div
+              className="relative rounded-2xl overflow-hidden"
+              style={{ height: 110, background: '#e0f2fe' }}
+            >
+              <div style={{ position: 'absolute', top: 14, left: 14, zIndex: 2 }}>
+                <SpeechBubble text={name || 'Chapter name...'} />
+              </div>
+              <img
+                src={getMascotSrc(mascotId)}
+                alt=""
+                style={{
+                  position: 'absolute',
+                  bottom: -10,
+                  right: -6,
+                  height: 110,
+                  width: 'auto',
+                  objectFit: 'contain',
+                }}
+              />
+            </div>
           </div>
 
           {/* CTA */}
