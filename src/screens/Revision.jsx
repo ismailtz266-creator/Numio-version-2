@@ -22,7 +22,12 @@ export default function Revision({ chapter, exams, onSelectExam, onBack }) {
           <button
             key={exam.id}
             onClick={() => onSelectExam(exam)}
-            className="w-full text-left bg-white border-2 border-gray-100 rounded-2xl px-5 py-4 active:bg-gray-50 transition-colors shadow-sm"
+            className="w-full text-left bg-white border-2 border-gray-100 rounded-2xl px-5 py-4 transition-all active:translate-y-1"
+            style={{ boxShadow: '0 4px 0 #e5e7eb' }}
+            onMouseDown={e => e.currentTarget.style.boxShadow = 'none'}
+            onMouseUp={e => e.currentTarget.style.boxShadow = '0 4px 0 #e5e7eb'}
+            onTouchStart={e => e.currentTarget.style.boxShadow = 'none'}
+            onTouchEnd={e => e.currentTarget.style.boxShadow = '0 4px 0 #e5e7eb'}
           >
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center font-display font-extrabold text-lg text-duo flex-shrink-0">
