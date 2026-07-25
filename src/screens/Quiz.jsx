@@ -1,18 +1,14 @@
 import { useState } from 'react'
+import { addCoins } from '../lib/economy'
 
-// ── Icons ─────────────────────────────────────────────────────────
+const COINS_PER_QUIZ = 20
 
-function XIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 20 20" fill="none" stroke="currentColor"
-      strokeWidth="2.5" strokeLinecap="round" aria-hidden="true">
-      <path d="M4 4l12 12M16 4L4 16" />
-    </svg>
-  )
+// ── Coin icon ─────────────────────────────────────────────────────
+function CoinIcon({ size = 28 }) {
+  return <img src="/coin.png" width={size} height={size} alt="coin" style={{ objectFit: 'contain' }} />
 }
 
 // ── Quit popup ────────────────────────────────────────────────────
-
 function QuitPopup({ visible, onStay, onLeave }) {
   if (!visible) return null
   return (
@@ -45,18 +41,14 @@ function QuitPopup({ visible, onStay, onLeave }) {
             color: '#fff', fontFamily: "'Baloo 2', sans-serif",
             fontWeight: 800, fontSize: 16, letterSpacing: '0.05em',
             textTransform: 'uppercase',
-          }}>
-            KEEP GOING 💪
-          </button>
+          }}>KEEP GOING 💪</button>
           <button onClick={onLeave} style={{
             width: '100%', border: 'none', cursor: 'pointer',
             padding: '12px 0', borderRadius: 14,
             background: 'none', color: '#9ca3af',
             fontFamily: "'Baloo 2', sans-serif",
             fontWeight: 700, fontSize: 14,
-          }}>
-            Yes, leave
-          </button>
+          }}>Yes, leave</button>
         </div>
       </div>
     </div>
@@ -64,116 +56,174 @@ function QuitPopup({ visible, onStay, onLeave }) {
 }
 
 // ── Results screen ────────────────────────────────────────────────
-
-function ResultsScreen({ questions, answers, topic, onDone }) {
-  const correct = questions.filter((q, i) => answers[i] === q.correct_answer).length
+function ResultsScreen({ questions, answers, topic, onDone, coinsSaved }) {
+  const correct = questions.filter((q, i) => {
+    const a = answers[i]
+    return normalize(a) === normalize(q.correct_answer)
+  }).length
   const total   = questions.length
-  const pct     = Math.round((correct / total) * 100)
+  const wrong   = questions.filter((q, i) => normalize(answers[i]) !== normalize(q.correct_answer))
 
-  const emoji = pct === 100 ? '🏆' : pct >= 80 ? '🎉' : pct >= 60 ? '😊' : '💪'
-  const msg   = pct === 100 ? 'Perfect score!' : pct >= 80 ? 'Great job!' : pct >= 60 ? 'Good effort!' : 'Keep practicing!'
+  const pct = Math.round((correct / total) * 100)
+
+  let emoji, headline, sub
+  if (pct === 100) {
+    emoji = '🏆'; headline = 'Perfect score!'; sub = 'If this was a real exam, you just aced it!'
+  } else if (pct >= 80) {
+    emoji = '🎉'; headline = 'Almost perfect!'; sub = "You'd pass this exam easily!"
+  } else if (pct >= 60) {
+    emoji = '😊'; headline = 'Good effort!'; sub = "You'd pass, but there's room to grow."
+  } else {
+    emoji = '💪'; headline = 'Keep going!'; sub = 'Re-read the page and try again — you got this!'
+  }
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 gap-6">
-      <span style={{ fontSize: 80 }}>{emoji}</span>
+    <div className="min-h-screen bg-white flex flex-col items-center px-6 py-10 gap-5" style={{ height: '100dvh', overflowY: 'auto' }}>
+      <div className="w-full max-w-sm flex flex-col items-center gap-5">
 
-      <div className="text-center">
-        <h2 className="font-display font-extrabold text-4xl text-ink">{msg}</h2>
-        <p className="text-muted font-body text-base mt-2">{topic}</p>
-      </div>
+        {/* Mascot */}
+        <div style={{ animation: 'mascot-float 2s ease-in-out infinite' }}>
+          <img src="/mascot.png" alt="Numio" className="w-28 h-auto" />
+        </div>
 
-      {/* Score circle */}
-      <div className="w-32 h-32 rounded-full bg-green-50 border-4 border-duo flex flex-col items-center justify-center">
-        <span className="font-display font-extrabold text-4xl text-duo">{correct}/{total}</span>
-        <span className="font-body text-sm text-muted">{pct}%</span>
-      </div>
+        {/* Headline */}
+        <div className="text-center">
+          <p style={{ fontSize: 48 }}>{emoji}</p>
+          <h2 className="font-display font-extrabold text-3xl text-ink mt-1">{headline}</h2>
+          <p className="font-body text-base text-muted mt-1">{sub}</p>
+        </div>
 
-      {/* Per-question recap */}
-      <div className="w-full max-w-xs flex flex-col gap-2">
-        {questions.map((q, i) => {
-          const isCorrect = answers[i] === q.correct_answer
-          return (
-            <div key={i} className={`rounded-2xl px-4 py-3 border-2 ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-100 bg-red-50'}`}>
-              <div className="flex items-center gap-2 mb-1">
-                <span>{isCorrect ? '✅' : '❌'}</span>
-                <p className="font-body text-sm text-ink font-semibold leading-tight">{q.question}</p>
+        {/* Coins earned */}
+        <div className="flex items-center gap-3 bg-amber-50 border-2 border-amber-200 rounded-2xl px-6 py-4">
+          <CoinIcon size={40} />
+          <div>
+            <p className="font-body text-xs text-amber-600 font-bold uppercase tracking-widest">Coins earned</p>
+            <p className="font-display font-extrabold text-3xl text-amber-500">+{COINS_PER_QUIZ}</p>
+          </div>
+        </div>
+
+        {/* Score */}
+        <div className="w-full bg-gray-50 rounded-2xl px-5 py-3 flex items-center justify-between">
+          <span className="font-body font-bold text-sm text-muted">Score</span>
+          <span className="font-display font-bold text-lg text-ink">{correct}/{total} · {pct}%</span>
+        </div>
+
+        {/* Wrong answers to review */}
+        {wrong.length > 0 && (
+          <div className="w-full flex flex-col gap-2">
+            <p className="font-body font-bold text-xs text-muted uppercase tracking-widest">
+              📖 Worth reviewing:
+            </p>
+            {wrong.map((q, i) => (
+              <div key={i} className="bg-red-50 border border-red-100 rounded-2xl px-4 py-3">
+                <p className="font-body text-sm text-ink font-semibold leading-snug">{q.question}</p>
+                <p className="font-body text-xs text-duo font-bold mt-1">✓ {q.correct_answer}</p>
               </div>
-              {!isCorrect && (
-                <p className="font-body text-xs text-duo font-bold ml-6">
-                  Answer: {q.correct_answer}
-                </p>
-              )}
-            </div>
-          )
-        })}
+            ))}
+          </div>
+        )}
+
+        <button
+          onClick={onDone}
+          className="w-full bg-duo active:bg-duo-dark text-white font-display font-bold text-xl rounded-2xl py-5 shadow-[0_4px_0_#58a700] active:shadow-none active:translate-y-1 transition-all"
+        >
+          Continue →
+        </button>
       </div>
 
-      <button
-        onClick={onDone}
-        className="w-full max-w-xs bg-duo active:bg-duo-dark text-white font-display font-bold text-lg rounded-2xl py-5 shadow-[0_4px_0_#58a700] active:shadow-none active:translate-y-1 transition-all"
-      >
-        Done →
-      </button>
+      <style>{`
+        @keyframes mascot-float {
+          0%,100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
+      `}</style>
     </div>
   )
 }
 
-// ── Main Quiz component ───────────────────────────────────────────
+// ── Normalize helper (same as before) ────────────────────────────
+function normalize(str) {
+  return (str || '')
+    .trim()
+    .toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/^(les|des|un|une|le|la|l'|the|a|an)\s+/i, '')
+    .replace(/s$/, '')
+    .trim()
+}
 
+// ── MCQ Card ──────────────────────────────────────────────────────
+function MCQCard({ option, selected, revealed, correct, onSelect, big }) {
+  const isSelected = selected === option
+  const isCorrect  = option === correct
+
+  let borderColor = 'border-gray-200'
+  let bgColor     = 'bg-white'
+  let textColor   = 'text-ink'
+
+  if (revealed) {
+    if (isCorrect)              { borderColor = 'border-green-400'; bgColor = 'bg-green-50'; textColor = 'text-green-700' }
+    else if (isSelected)        { borderColor = 'border-red-300';   bgColor = 'bg-red-50';   textColor = 'text-red-500' }
+    else                        { borderColor = 'border-gray-100';  textColor = 'text-gray-300' }
+  } else if (isSelected)        { borderColor = 'border-blue-400'; bgColor = 'bg-blue-50'; textColor = 'text-blue-700' }
+
+  return (
+    <button
+      disabled={revealed}
+      onClick={() => onSelect(option)}
+      className={`w-full rounded-2xl border-2 font-display font-bold transition-all active:scale-[0.97] select-none
+        ${big ? 'text-3xl h-28 flex items-center justify-center' : 'text-lg px-5 py-4 text-left'}
+        ${borderColor} ${bgColor} ${textColor}`}
+    >
+      {option}
+    </button>
+  )
+}
+
+// ── X Icon ────────────────────────────────────────────────────────
+function XIcon() {
+  return (
+    <svg width="40" height="40" viewBox="0 0 20 20" fill="none" stroke="currentColor"
+      strokeWidth="2.5" strokeLinecap="round">
+      <path d="M4 4l12 12M16 4L4 16" />
+    </svg>
+  )
+}
+
+// ── Main Quiz ─────────────────────────────────────────────────────
 export default function Quiz({ exam, onDone }) {
   const questions = exam.questions || []
   const topic     = exam.topic || 'Quiz'
 
-  const [idx,          setIdx]          = useState(0)
-  const [selected,     setSelected]     = useState(null)
-  const [revealed,     setRevealed]     = useState(false)
-  const [answers,      setAnswers]      = useState([])
-  const [showQuit,     setShowQuit]     = useState(false)
-  const [showResults,  setShowResults]  = useState(false)
-  const [typedValue,   setTypedValue]   = useState('')
+  const [idx,         setIdx]         = useState(0)
+  const [selected,    setSelected]    = useState(null)
+  const [revealed,    setRevealed]    = useState(false)
+  const [answers,     setAnswers]     = useState([])
+  const [showQuit,    setShowQuit]    = useState(false)
+  const [showResults, setShowResults] = useState(false)
+  const [typedValue,  setTypedValue]  = useState('')
+  const [saving,      setSaving]      = useState(false)
 
-  const q = questions[idx]
-  if (!q) return null
-
+  const q             = questions[idx]
   const total         = questions.length
   const progressScale = (idx + (revealed ? 1 : 0)) / Math.max(total, 1)
 
-  // Normalize: lowercase, remove articles, accents, plural s
-  function normalize(str) {
-    return (str || "")
-      .trim()
-      .toLowerCase()
-      .normalize("NFD").replace(/[̀-ͯ]/g, "") // remove accents
-      .replace(/^(les|des|un|une|le|la|l'|the|a|an)\s+/i, "") // remove articles
-      .replace(/s$/, "") // remove trailing s for plural
-      .trim()
-  }
-
-  // Fuzzy match — ignores articles, accents, plural
   function checkCorrect(answer) {
-    return normalize(answer) === normalize(q.correct_answer)
+    return normalize(answer) === normalize(q?.correct_answer)
   }
 
-  const isCorrect = revealed && checkCorrect(selected)
+  const isCorrect = revealed && checkCorrect(q?.type === 'fill_blank' ? typedValue : selected)
 
-  function handleSelect(choice) {
-    if (revealed) return
-    setSelected(choice)
-  }
-
-  function handleCheck() {
-    if (!selected && typedValue === '') return
-    const answer = q.type === 'fill_blank' ? typedValue : selected
-    setSelected(answer)
-    setRevealed(true)
-  }
-
-  function handleContinue() {
-    const answer = q.type === 'fill_blank' ? typedValue : selected
+  async function handleContinue() {
+    const answer    = q.type === 'fill_blank' ? typedValue : selected
     const newAnswers = [...answers, answer]
     setAnswers(newAnswers)
 
     if (idx === total - 1) {
+      // Last question — award coins then show results
+      setSaving(true)
+      try { await addCoins(COINS_PER_QUIZ) } catch (e) { console.error('Coin error:', e) }
+      setSaving(false)
       setShowResults(true)
       return
     }
@@ -182,6 +232,13 @@ export default function Quiz({ exam, onDone }) {
     setSelected(null)
     setRevealed(false)
     setTypedValue('')
+  }
+
+  function handleCheck() {
+    const answer = q.type === 'fill_blank' ? typedValue : selected
+    if (!answer && answer !== false) return
+    setSelected(q.type === 'fill_blank' ? typedValue : selected)
+    setRevealed(true)
   }
 
   if (showResults) {
@@ -195,6 +252,8 @@ export default function Quiz({ exam, onDone }) {
     )
   }
 
+  if (!q) return null
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <QuitPopup
@@ -205,60 +264,40 @@ export default function Quiz({ exam, onDone }) {
 
       <div className="flex flex-col bg-white w-full max-w-sm" style={{ height: '100dvh' }}>
 
-        {/* ── Top bar ─────────────────────────────────────── */}
+        {/* Top bar */}
         <div className="flex-shrink-0 flex items-center gap-3 px-4 pt-2 pb-1">
-          <button
-            onClick={() => setShowQuit(true)}
-            className="w-11 h-11 flex items-center justify-center rounded-full text-gray-300 active:bg-gray-100"
-          >
+          <button onClick={() => setShowQuit(true)}
+            className="w-11 h-11 flex items-center justify-center rounded-full text-gray-300 active:bg-gray-100">
             <XIcon />
           </button>
-
-          {/* Progress bar */}
-          <div className="flex-1 h-5 rounded-full overflow-hidden bg-gray-100"
-            role="progressbar" aria-valuenow={idx} aria-valuemax={total}>
-            <div
-              className="h-full rounded-full bg-duo origin-left"
-              style={{
-                transform: `scaleX(${progressScale})`,
-                transition: 'transform 350ms cubic-bezier(0.4,0,0.2,1)',
-              }}
-            />
+          <div className="flex-1 h-5 rounded-full overflow-hidden bg-gray-100">
+            <div className="h-full rounded-full bg-duo origin-left"
+              style={{ transform: `scaleX(${progressScale})`, transition: 'transform 350ms cubic-bezier(0.4,0,0.2,1)' }} />
           </div>
-
-          {/* Question counter */}
-          <span className="font-display font-bold text-sm text-muted whitespace-nowrap">
-            {idx + 1}/{total}
-          </span>
+          <div className="flex items-center gap-1">
+            <CoinIcon size={24} />
+            <span className="font-display font-bold text-sm text-amber-500">{COINS_PER_QUIZ}</span>
+          </div>
+          <span className="font-display font-bold text-sm text-muted">{idx + 1}/{total}</span>
         </div>
 
-        {/* ── Topic label ─────────────────────────────────── */}
+        {/* Topic */}
         <div className="flex-shrink-0 px-5 pt-2 pb-1">
-          <p className="font-body font-bold text-xs tracking-widest uppercase text-duo">
-            {topic}
-          </p>
+          <p className="font-body font-bold text-xs tracking-widest uppercase text-duo">{topic}</p>
         </div>
 
-        {/* ── Question ────────────────────────────────────── */}
+        {/* Question */}
         <div className="flex-shrink-0 px-6 pt-4 pb-3">
-          <p className="font-display font-bold text-2xl text-ink leading-snug">
-            {q.question}
-          </p>
+          <p className="font-display font-bold text-2xl text-ink leading-snug">{q.question}</p>
         </div>
 
-        {/* ── Answer area ─────────────────────────────────── */}
+        {/* Answers */}
         <div className="flex-shrink-0 px-4 mt-2 flex-1">
           {q.type === 'mcq' && (
-            <div className="grid grid-cols-1 gap-3">
+            <div className="flex flex-col gap-3">
               {q.options.map(option => (
-                <MCQCard
-                  key={option}
-                  option={option}
-                  selected={selected}
-                  revealed={revealed}
-                  correct={q.correct_answer}
-                  onSelect={handleSelect}
-                />
+                <MCQCard key={option} option={option} selected={selected}
+                  revealed={revealed} correct={q.correct_answer} onSelect={setSelected} />
               ))}
             </div>
           )}
@@ -266,15 +305,8 @@ export default function Quiz({ exam, onDone }) {
           {q.type === 'true_false' && (
             <div className="grid grid-cols-2 gap-3">
               {['True', 'False'].map(option => (
-                <MCQCard
-                  key={option}
-                  option={option}
-                  selected={selected}
-                  revealed={revealed}
-                  correct={q.correct_answer}
-                  onSelect={handleSelect}
-                  big
-                />
+                <MCQCard key={option} option={option} selected={selected}
+                  revealed={revealed} correct={q.correct_answer} onSelect={setSelected} big />
               ))}
             </div>
           )}
@@ -289,9 +321,7 @@ export default function Quiz({ exam, onDone }) {
                 placeholder="Type your answer..."
                 className={`w-full border-2 rounded-2xl px-4 py-4 font-display font-bold text-xl text-ink outline-none transition-colors ${
                   revealed
-                    ? checkCorrect(typedValue)
-                      ? 'border-green-400 bg-green-50'
-                      : 'border-red-300 bg-red-50'
+                    ? checkCorrect(typedValue) ? 'border-green-400 bg-green-50' : 'border-red-300 bg-red-50'
                     : 'border-gray-200 focus:border-duo'
                 }`}
               />
@@ -303,25 +333,19 @@ export default function Quiz({ exam, onDone }) {
             </div>
           )}
 
-          {/* Explanation — shown after reveal */}
+          {/* Explanation */}
           {revealed && q.explanation && (
             <div className="mt-4 bg-blue-50 border-2 border-blue-100 rounded-2xl px-4 py-3">
-              <p className="font-body text-sm text-blue-700 leading-snug">
-                💡 {q.explanation}
-              </p>
+              <p className="font-body text-sm text-blue-700 leading-snug">💡 {q.explanation}</p>
             </div>
           )}
         </div>
 
-        {/* ── Bottom action ────────────────────────────────── */}
+        {/* Bottom action */}
         <div className="flex-shrink-0 px-4 pt-2 pb-6">
           {!revealed ? (
             <button
-              disabled={
-                q.type === 'fill_blank'
-                  ? typedValue.trim() === ''
-                  : selected === null
-              }
+              disabled={q.type === 'fill_blank' ? typedValue.trim() === '' : selected === null}
               onClick={handleCheck}
               className="w-full bg-duo active:bg-duo-dark disabled:opacity-40 text-white font-display font-bold text-xl rounded-2xl py-5 shadow-[0_4px_0_#58a700] active:shadow-none active:translate-y-1 transition-all tracking-widest"
             >
@@ -337,57 +361,15 @@ export default function Quiz({ exam, onDone }) {
               </div>
               <button
                 onClick={handleContinue}
+                disabled={saving}
                 className={`w-full py-4 font-display font-bold text-xl tracking-widest text-white ${isCorrect ? 'bg-duo' : 'bg-amber-400'}`}
               >
-                CONTINUE →
+                {saving ? 'Saving...' : 'CONTINUE →'}
               </button>
             </div>
           )}
         </div>
       </div>
     </div>
-  )
-}
-
-// ── MCQ Card ──────────────────────────────────────────────────────
-
-function MCQCard({ option, selected, revealed, correct, onSelect, big }) {
-  const isSelected = selected === option
-  const isCorrect  = option === correct
-
-  let borderColor = 'border-gray-200'
-  let bgColor     = 'bg-white'
-  let textColor   = 'text-ink'
-
-  if (revealed) {
-    if (isCorrect) {
-      borderColor = 'border-green-400'
-      bgColor     = 'bg-green-50'
-      textColor   = 'text-green-700'
-    } else if (isSelected && !isCorrect) {
-      borderColor = 'border-red-300'
-      bgColor     = 'bg-red-50'
-      textColor   = 'text-red-500'
-    } else {
-      borderColor = 'border-gray-100'
-      textColor   = 'text-gray-300'
-    }
-  } else if (isSelected) {
-    borderColor = 'border-blue-400'
-    bgColor     = 'bg-blue-50'
-    textColor   = 'text-blue-700'
-  }
-
-  return (
-    <button
-      disabled={revealed}
-      onClick={() => onSelect(option)}
-      className={`w-full rounded-2xl border-2 font-display font-bold transition-all active:scale-[0.97] select-none
-        ${big ? 'text-3xl h-28 flex items-center justify-center' : 'text-lg px-5 py-4 text-left'}
-        ${borderColor} ${bgColor} ${textColor}
-      `}
-    >
-      {option}
-    </button>
   )
 }
