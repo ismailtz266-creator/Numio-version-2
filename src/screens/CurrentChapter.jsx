@@ -48,7 +48,12 @@ export default function CurrentChapter({ chapter, onNew, onRevision, onBack }) {
           {/* New — green */}
           <button
             onClick={() => onNew(chapter)}
-            className="w-full bg-duo active:bg-duo-dark hover:bg-duo-dark text-white font-display font-extrabold text-2xl rounded-3xl py-10 shadow-[0_5px_0_#58a700] active:shadow-none active:translate-y-1 transition-all flex flex-col items-center gap-2"
+            className="w-full bg-duo text-white font-display font-extrabold text-2xl rounded-3xl py-10 transition-all flex flex-col items-center gap-2 active:translate-y-1"
+            style={{ boxShadow: '0 5px 0 #46a302' }}
+            onMouseDown={e => e.currentTarget.style.boxShadow = 'none'}
+            onMouseUp={e => e.currentTarget.style.boxShadow = '0 5px 0 #46a302'}
+            onTouchStart={e => e.currentTarget.style.boxShadow = 'none'}
+            onTouchEnd={e => e.currentTarget.style.boxShadow = '0 5px 0 #46a302'}
           >
             <span style={{ fontSize: 40 }}>📸</span>
             New
@@ -58,7 +63,12 @@ export default function CurrentChapter({ chapter, onNew, onRevision, onBack }) {
           <button
             onClick={() => onRevision(chapter, exams)}
             disabled={exams.length === 0}
-            className="w-full bg-gray-100 active:bg-gray-200 hover:bg-gray-200 disabled:opacity-40 text-gray-500 font-display font-extrabold text-2xl rounded-3xl py-10 shadow-[0_5px_0_#d1d5db] active:shadow-none active:translate-y-1 transition-all flex flex-col items-center gap-2 disabled:cursor-not-allowed"
+            className="w-full bg-gray-100 disabled:opacity-40 text-gray-500 font-display font-extrabold text-2xl rounded-3xl py-10 transition-all flex flex-col items-center gap-2 disabled:cursor-not-allowed active:translate-y-1"
+            style={{ boxShadow: '0 5px 0 #d1d5db' }}
+            onMouseDown={e => !e.currentTarget.disabled && (e.currentTarget.style.boxShadow = 'none')}
+            onMouseUp={e => e.currentTarget.style.boxShadow = '0 5px 0 #d1d5db'}
+            onTouchStart={e => !e.currentTarget.disabled && (e.currentTarget.style.boxShadow = 'none')}
+            onTouchEnd={e => e.currentTarget.style.boxShadow = '0 5px 0 #d1d5db'}
           >
             <span style={{ fontSize: 40 }}>📋</span>
             Revision
