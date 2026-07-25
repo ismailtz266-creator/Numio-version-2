@@ -57,7 +57,7 @@ export default function Rewards() {
 
         {/* Coin balance */}
         <div className="flex-shrink-0 flex items-center gap-3 bg-amber-50 border-2 border-amber-200 rounded-2xl px-5 py-4 mb-5">
-          <CoinIcon size={40} />
+          <CoinIcon size={80} />
           <div>
             <p className="font-body text-xs text-amber-600 font-bold uppercase tracking-widest">Your balance</p>
             <p className="font-display font-extrabold text-3xl text-amber-500">{balance} coins</p>
@@ -107,11 +107,12 @@ export default function Rewards() {
                         <button
                           onClick={() => handleClaim(reward)}
                           disabled={!canAfford || isClaiming}
-                          className={`px-4 py-2 rounded-xl font-display font-bold text-sm transition-all ${
+                          className={`px-4 py-2 rounded-xl font-display font-bold text-sm transition-all active:translate-y-0.5 ${
                             canAfford
-                              ? 'bg-duo text-white shadow-[0_3px_0_#58a700] active:shadow-none active:translate-y-0.5'
+                              ? 'bg-duo text-white'
                               : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                          }`}>
+                          }`}
+                          style={{ boxShadow: canAfford ? '0 3px 0 #46a302' : 'none' }}>
                           {isClaiming ? '...' : canAfford ? 'Claim' : 'Need more'}
                         </button>
                       </div>
