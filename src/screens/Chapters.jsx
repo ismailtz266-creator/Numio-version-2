@@ -113,43 +113,23 @@ function ChapterCard({ chapter, colorIndex, onClick }) {
         className="relative overflow-hidden"
         style={{ background: color.bg, height: 140 }}
       >
-        {/* Speech bubble — top left, chapter name written by code */}
-        <div style={{
+        {/* Chapter name overlaid on the bubble that's part of the mascot image */}
+        <span style={{
           position: 'absolute',
-          top: 16,
-          left: 16,
-          background: 'white',
-          borderRadius: 16,
-          padding: '8px 14px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.10)',
-          maxWidth: '60%',
+          top: 18,
+          left: 20,
+          fontFamily: '"Baloo 2", sans-serif',
+          fontWeight: 800,
+          fontSize: 15,
+          color: '#3c3c3c',
           zIndex: 2,
+          maxWidth: '55%',
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
         }}>
-          <span style={{
-            fontFamily: '"Baloo 2", sans-serif',
-            fontWeight: 800,
-            fontSize: 15,
-            color: '#3c3c3c',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: 'block',
-            maxWidth: 130,
-          }}>
-            {chapter.name}
-          </span>
-          {/* Bubble tail pointing down-left toward mascot */}
-          <div style={{
-            position: 'absolute',
-            bottom: -8,
-            left: 18,
-            width: 0,
-            height: 0,
-            borderLeft: '8px solid transparent',
-            borderRight: '8px solid transparent',
-            borderTop: '9px solid white',
-          }} />
-        </div>
+          {chapter.name}
+        </span>
 
         {/* Mascot — big, bottom-right, partially cut off */}
         <img
@@ -273,33 +253,18 @@ function ChapterModal({ onConfirm, onClose }) {
             className="relative rounded-2xl overflow-hidden flex items-end"
             style={{ height: 100, background: '#e0f2fe' }}
           >
-            <div style={{
+            <span style={{
               position: 'absolute',
-              top: 12,
-              left: 14,
-              background: 'white',
-              borderRadius: 12,
-              padding: '6px 12px',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+              top: 14,
+              left: 18,
+              fontFamily: '"Baloo 2", sans-serif',
+              fontWeight: 800,
+              fontSize: 14,
+              color: '#3c3c3c',
+              zIndex: 2,
             }}>
-              <span style={{
-                fontFamily: '"Baloo 2", sans-serif',
-                fontWeight: 800,
-                fontSize: 14,
-                color: '#3c3c3c',
-              }}>
-                {name || 'Chapter name...'}
-              </span>
-              <div style={{
-                position: 'absolute',
-                bottom: -7,
-                left: 14,
-                width: 0, height: 0,
-                borderLeft: '7px solid transparent',
-                borderRight: '7px solid transparent',
-                borderTop: '8px solid white',
-              }} />
-            </div>
+              {name || 'Chapter name...'}
+            </span>
             <img
               src={getMascotSrc(mascotId)}
               alt=""
