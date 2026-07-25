@@ -250,18 +250,44 @@ export default function Onboarding({ onComplete }) {
 
   if (screen === 'graffiti') {
     return (
-      <div className="min-h-screen bg-duo flex flex-col items-center justify-center px-6 gap-6" style={{ height: '100dvh' }}>
-        <div style={{ animation: 'pop-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both' }}>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center px-6 gap-6 relative overflow-hidden" style={{ height: '100dvh' }}>
+        {/* Confetti */}
+        {Array.from({ length: 40 }).map((_, i) => {
+          const colors = ['#58cc02','#a78bfa','#fbbf24','#f472b6','#60a5fa','#34d399','#fb923c']
+          const left = Math.random() * 100
+          const delay = Math.random() * 0.6
+          const duration = 0.9 + Math.random() * 0.8
+          const size = 8 + Math.random() * 10
+          const color = colors[i % colors.length]
+          const isCircle = i % 3 === 0
+          return (
+            <div key={i} style={{
+              position: 'absolute', bottom: -20, left: `${left}%`,
+              width: size, height: size,
+              borderRadius: isCircle ? '50%' : 3,
+              backgroundColor: color,
+              animation: `confetti-rise ${duration}s ${delay}s cubic-bezier(0.2,0.8,0.3,1) both`,
+              transform: `rotate(${Math.random() * 360}deg)`,
+              pointerEvents: 'none',
+            }} />
+          )
+        })}
+
+        <div style={{ animation: 'pop-in 0.5s cubic-bezier(0.34,1.56,0.64,1) both', position: 'relative', zIndex: 1 }}>
           <img src="/mascot.png" alt="Numio" className="w-40 h-auto" />
         </div>
-        <div className="text-center" style={{ animation: 'pop-in 0.5s 0.15s cubic-bezier(0.34,1.56,0.64,1) both' }}>
-          <h1 className="font-display font-extrabold text-5xl text-white">Welcome! 🎉</h1>
-          <p className="font-body text-lg text-white/80 mt-2">Your account is ready!</p>
+        <div className="text-center" style={{ animation: 'pop-in 0.5s 0.15s cubic-bezier(0.34,1.56,0.64,1) both', position: 'relative', zIndex: 1 }}>
+          <h1 className="font-display font-extrabold text-5xl text-ink">Welcome! 🎉</h1>
+          <p className="font-body text-lg text-muted mt-2">Your account is ready!</p>
         </div>
         <style>{`
           @keyframes pop-in {
             from { opacity: 0; transform: scale(0.5); }
             to   { opacity: 1; transform: scale(1); }
+          }
+          @keyframes confetti-rise {
+            0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(-110vh) rotate(720deg); opacity: 0; }
           }
         `}</style>
       </div>
