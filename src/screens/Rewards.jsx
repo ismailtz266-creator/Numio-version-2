@@ -1,26 +1,27 @@
 import { useState, useEffect } from 'react'
 import { getRewards, getCoinBalance, claimReward, getClaims } from '../lib/economy'
+import { useLang } from '../lib/LangContext'
+import { t } from '../lib/i18n'
 
 function CoinIcon({ size = 24 }) {
   return <img src="/coin.png" width={size} height={size} alt="coin" style={{ objectFit: 'contain' }} />
 }
 
 export default function Rewards() {
+  const lang = useLang()
   const [rewards, setRewards]   = useState([])
   const [claims, setClaims]     = useState([])
   const [balance, setBalance]   = useState(0)
   const [loading, setLoading]   = useState(true)
   const [claiming, setClaiming] = useState(null)
-  const [tab, setTab]           = useState('rewards') // 'rewards' | 'history'
+  const [tab, setTab]           = useState('rewards')
 
   useEffect(() => { load() }, [])
 
   async function load() {
     try {
       const [r, b, c] = await Promise.all([getRewards(), getCoinBalance(), getClaims()])
-      setRewards(r)
-      setBalance(b)
-      setClaims(c)
+      setRewards(r); setBalance(b); setClaims(c)
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
   }
@@ -32,11 +33,8 @@ export default function Rewards() {
       const { newBalance } = await claimReward(reward.id, reward.cost)
       setBalance(newBalance)
       await load()
-    } catch (e) {
-      alert(e.message)
-    } finally {
-      setClaiming(null)
-    }
+    } catch (e) { alert(e.message) }
+    finally { setClaiming(null) }
   }
 
   if (loading) return (
@@ -48,43 +46,38 @@ export default function Rewards() {
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ height: '100dvh' }}>
       <div className="w-full max-w-lg mx-auto px-5 flex flex-col flex-1">
-
-        {/* Header */}
         <div className="flex-shrink-0 pt-12 pb-4">
-          <h1 className="font-display font-extrabold text-3xl text-ink">Rewards</h1>
-          <p className="text-muted font-body text-sm mt-1">Spend your coins on something fun 🎁</p>
+          <h1 className="font-display font-extrabold text-3xl text-ink">{t(lang, 'rewards_title')}</h1>
+          <p className="text-muted font-body text-sm mt-1">{t(lang, 'rewards_sub')}</p>
         </div>
 
-        {/* Coin balance */}
         <div className="flex-shrink-0 flex items-center gap-3 bg-amber-50 border-2 border-amber-200 rounded-2xl px-5 py-4 mb-5">
           <CoinIcon size={80} />
           <div>
-            <p className="font-body text-xs text-amber-600 font-bold uppercase tracking-widest">Your balance</p>
-            <p className="font-display font-extrabold text-3xl text-amber-500">{balance} coins</p>
+            <p className="font-body text-xs text-amber-600 font-bold uppercase tracking-widest">{t(lang, 'rewards_balance_label')}</p>
+            <p className="font-display font-extrabold text-3xl text-amber-500">{balance} {t(lang, 'rewards_balance_unit')}</p>
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="flex-shrink-0 flex gap-2 mb-4">
-          {['rewards', 'history'].map(t => (
-            <button key={t} onClick={() => setTab(t)}
+          {['rewards', 'history'].map(tabId => (
+            <button key={tabId} onClick={() => setTab(tabId)}
               className={`flex-1 py-2 rounded-xl font-display font-bold text-sm capitalize transition-all ${
-                tab === t ? 'bg-duo text-white' : 'bg-gray-100 text-muted'
+                tab === tabId ? 'bg-duo text-white' : 'bg-gray-100 text-muted'
               }`}>
-              {t === 'rewards' ? '🎁 Rewards' : '📋 History'}
+              {tabId === 'rewards' ? t(lang, 'rewards_tab_rewards') : t(lang, 'rewards_tab_history')}
             </button>
           ))}
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto pb-6">
           {tab === 'rewards' && (
             <>
               {rewards.length === 0 ? (
                 <div className="flex flex-col items-center justify-center pt-20 gap-4 text-center">
                   <span style={{ fontSize: 64 }}>🎁</span>
-                  <p className="font-display font-extrabold text-xl text-ink">No rewards yet</p>
-                  <p className="text-muted font-body text-sm">Ask a parent to set up rewards in the Parent Zone!</p>
+                  <p className="font-display font-extrabold text-xl text-ink">{t(lang, 'rewards_empty_title')}</p>
+                  <p className="text-muted font-body text-sm">{t(lang, 'rewards_empty_sub')}</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
@@ -101,19 +94,17 @@ export default function Rewards() {
                           <p className="font-display font-bold text-lg text-ink">{reward.name}</p>
                           <div className="flex items-center gap-1 mt-0.5">
                             <CoinIcon size={16} />
-                            <span className="font-body font-bold text-sm text-amber-600">{reward.cost} coins</span>
+                            <span className="font-body font-bold text-sm text-amber-600">{reward.cost} {t(lang, 'rewards_balance_unit')}</span>
                           </div>
                         </div>
                         <button
                           onClick={() => handleClaim(reward)}
                           disabled={!canAfford || isClaiming}
                           className={`px-4 py-2 rounded-xl font-display font-bold text-sm transition-all active:translate-y-0.5 ${
-                            canAfford
-                              ? 'bg-duo text-white'
-                              : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            canAfford ? 'bg-duo text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'
                           }`}
                           style={{ boxShadow: canAfford ? '0 3px 0 #46a302' : 'none' }}>
-                          {isClaiming ? '...' : canAfford ? 'Claim' : 'Need more'}
+                          {isClaiming ? '...' : canAfford ? t(lang, 'rewards_claim') : t(lang, 'rewards_need_more')}
                         </button>
                       </div>
                     )
@@ -128,8 +119,8 @@ export default function Rewards() {
               {claims.length === 0 ? (
                 <div className="flex flex-col items-center justify-center pt-20 gap-4 text-center">
                   <span style={{ fontSize: 64 }}>📋</span>
-                  <p className="font-display font-extrabold text-xl text-ink">No claims yet</p>
-                  <p className="text-muted font-body text-sm">Claim a reward to see it here!</p>
+                  <p className="font-display font-extrabold text-xl text-ink">{t(lang, 'rewards_history_empty_title')}</p>
+                  <p className="text-muted font-body text-sm">{t(lang, 'rewards_history_empty_sub')}</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-3">
@@ -139,7 +130,7 @@ export default function Rewards() {
                       <div className="flex-1 min-w-0">
                         <p className="font-display font-bold text-base text-ink truncate">{claim.rewards?.name}</p>
                         <p className="font-body text-xs text-muted">
-                          {claim.status === 'approved' ? 'Approved by parent!' : 'Waiting for parent approval'}
+                          {claim.status === 'approved' ? t(lang, 'rewards_approved') : t(lang, 'rewards_pending')}
                         </p>
                       </div>
                       <div className="flex items-center gap-1">
