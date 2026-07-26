@@ -62,7 +62,7 @@ export default function Nav({ active, onChange, streak = 0 }) {
               zIndex: 0,
             }}
           />
-          <span className="font-display font-extrabold text-2xl text-duo relative z-10 ml-10">
+          <span className="font-display font-extrabold text-2xl text-duo relative z-10 ml-14">
             Numio
           </span>
           <div className="ml-auto relative z-10">
