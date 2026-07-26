@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { addCoins, updateStreak } from '../lib/economy'
 import StreakPopup from './StreakPopup'
+import { useLang } from '../lib/LangContext'
+import { t } from '../lib/i18n'
 
 const COINS_PER_QUIZ = 20
 
@@ -193,6 +195,7 @@ function XIcon() {
 
 // ── Main Quiz ─────────────────────────────────────────────────────
 export default function Quiz({ exam, onDone }) {
+  const lang = useLang()
   const questions = exam.questions || []
   const topic     = exam.topic || 'Quiz'
 
@@ -341,7 +344,7 @@ export default function Quiz({ exam, onDone }) {
                 value={typedValue}
                 onChange={e => setTypedValue(e.target.value)}
                 disabled={revealed}
-                placeholder="Type your answer..."
+                placeholder={t(lang, 'quiz_fill_placeholder')}
                 className={`w-full border-2 rounded-2xl px-4 py-4 font-display font-bold text-xl text-ink outline-none transition-colors ${
                   revealed
                     ? checkCorrect(typedValue) ? 'border-green-400 bg-green-50' : 'border-red-300 bg-red-50'
@@ -350,7 +353,7 @@ export default function Quiz({ exam, onDone }) {
               />
               {revealed && !checkCorrect(typedValue) && (
                 <p className="font-body text-sm text-duo font-bold px-1">
-                  ✓ Correct answer: {q.correct_answer}
+                  {t(lang, 'quiz_correct_answer', q.correct_answer)}
                 </p>
               )}
             </div>
@@ -373,14 +376,14 @@ export default function Quiz({ exam, onDone }) {
               className="w-full bg-duo disabled:opacity-40 text-white font-display font-bold text-xl rounded-2xl py-5 transition-all tracking-widest active:translate-y-1"
               style={{ boxShadow: '0 4px 0 #46a302' }}
             >
-              CHECK
+              {t(lang, 'quiz_check')}
             </button>
           ) : (
             <div className={`rounded-2xl overflow-hidden border-2 ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-100 bg-red-50'}`}>
               <div className="flex items-center gap-3 px-4 py-3">
                 <span className="text-2xl">{isCorrect ? '🎉' : '💪'}</span>
                 <p className="font-display font-bold text-lg text-ink">
-                  {isCorrect ? 'Correct!' : 'Not quite!'}
+                  {isCorrect ? t(lang, 'quiz_correct') : t(lang, 'quiz_not_quite')}
                 </p>
               </div>
               <button
@@ -389,7 +392,7 @@ export default function Quiz({ exam, onDone }) {
                 className={`w-full py-4 font-display font-bold text-xl tracking-widest text-white active:translate-y-0.5 transition-all ${isCorrect ? 'bg-duo' : 'bg-amber-400'}`}
                 style={{ boxShadow: isCorrect ? '0 4px 0 #46a302' : '0 4px 0 #d97706' }}
               >
-                {saving ? 'Saving...' : 'CONTINUE →'}
+                {saving ? t(lang, 'quiz_saving') : t(lang, 'quiz_continue')}
               </button>
             </div>
           )}
