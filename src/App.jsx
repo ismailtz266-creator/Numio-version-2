@@ -12,13 +12,15 @@ import Rewards from './screens/Rewards'
 import ParentZone from './screens/ParentZone'
 import PinGate from './screens/PinGate'
 import QuizIntro from './screens/QuizIntro'
+import { LangContext } from './lib/LangContext'
 
 const HIDE_NAV = ['quiz', 'scan', 'quiz_intro']
 
 export default function App() {
   const [authReady, setAuthReady] = useState(false)
   const [streak, setStreak] = useState(0)
-  const [onboarded, setOnboarded] = useState(null) // null=checking, true, false
+  const [lang, setLang] = useState('en')
+  const [onboarded, setOnboarded] = useState(null)
   const [tab, setTab]             = useState('chapters')
   const [pinUnlocked, setPinUnlocked] = useState(false)
 
@@ -41,8 +43,9 @@ export default function App() {
         }
         // Check if profile has display_name
         const { supabase } = await import('./lib/supabaseClient')
-        const { data } = await supabase.from('profiles').select('display_name').eq('id', user.id).single()
+        const { data } = await supabase.from('profiles').select('display_name, language').eq('id', user.id).single()
         setOnboarded(!!data?.display_name)
+        if (data?.language) setLang(data.language)
         if (data?.display_name) {
           getStreak().then(s => setStreak(s.count)).catch(() => {})
         }
@@ -84,7 +87,12 @@ export default function App() {
   const showNav = !HIDE_NAV.includes(screen)
 
   return (
-    <div className="flex" style={{ overflow: 'hidden', maxWidth: '100vw', width: '100%' }}>
+    <LangContext.Provider value={lang}>
+      <div
+        className="flex"
+        dir={lang === 'ar' ? 'rtl' : 'ltr'}
+        style={{ overflow: 'hidden', maxWidth: '100vw', width: '100%' }}
+      >
       {showNav && <Nav active={tab} onChange={handleTabChange} streak={streak} />}
 
       <main
@@ -149,6 +157,7 @@ export default function App() {
         )}
         {screen === 'parent_zone' && pinUnlocked && <ParentZone />}
       </main>
-    </div>
+      </div>
+    </LangContext.Provider>
   )
 }
