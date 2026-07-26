@@ -161,7 +161,7 @@ export default function Onboarding({ onComplete, onLanguageChange }) {
         streak_count: 0,
       })
     } catch (e) { console.error(e) }
-    onComplete()
+    onComplete(name.trim())
   }
 
   useEffect(() => {
