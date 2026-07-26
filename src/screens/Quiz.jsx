@@ -144,7 +144,18 @@ function ResultsScreen({ questions, answers, topic, onDone, coinsEarned }) {
   )
 }
 
-// ── Normalize helper (same as before) ────────────────────────────
+// ── True/False options per language ──────────────────────────────
+function getTrueFalseOptions(correctAnswer) {
+  const a = (correctAnswer || '').toLowerCase()
+  if (a === 'vrai' || a === 'faux')           return ['Vrai', 'Faux']
+  if (a === 'صحيح' || a === 'خطأ')            return ['صحيح', 'خطأ']
+  if (a === 'verdadero' || a === 'falso')     return ['Verdadero', 'Falso']
+  if (a === 'wahr' || a === 'falsch')         return ['Wahr', 'Falsch']
+  if (a === 'vero' || a === 'falso')          return ['Vero', 'Falso']
+  return ['True', 'False'] // default English
+}
+
+// ── Normalize helper ──────────────────────────────────────────────
 function normalize(str) {
   return (str || '')
     .trim()
@@ -331,7 +342,7 @@ export default function Quiz({ exam, onDone }) {
 
           {q.type === 'true_false' && (
             <div className="grid grid-cols-2 gap-3">
-              {['True', 'False'].map(option => (
+              {getTrueFalseOptions(q.correct_answer).map(option => (
                 <MCQCard key={option} option={option} selected={selected}
                   revealed={revealed} correct={q.correct_answer} onSelect={setSelected} big />
               ))}
