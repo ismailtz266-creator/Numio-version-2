@@ -17,24 +17,24 @@ export default function Revision({ chapter, exams, onSelectExam, onBack }) {
       </div>
 
       {/* Exams list — scrollable, clipped */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 pb-10 flex flex-col gap-3">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden pb-10 flex flex-col gap-3" style={{ padding: '0 20px 40px' }}>
         {exams.map((exam, i) => (
           <button
             key={exam.id}
             onClick={() => onSelectExam(exam)}
-            className="w-full text-left bg-white border-2 border-gray-100 rounded-2xl px-5 py-4 transition-all active:translate-y-1 overflow-hidden"
-            style={{ boxShadow: '0 4px 0 #e5e7eb', maxWidth: '100%' }}
+            className="w-full text-left bg-white border-2 border-gray-100 rounded-2xl px-5 py-4 transition-all active:translate-y-1"
+            style={{ boxShadow: '0 4px 0 #e5e7eb', display: 'block', boxSizing: 'border-box' }}
             onMouseDown={e => e.currentTarget.style.boxShadow = 'none'}
             onMouseUp={e => e.currentTarget.style.boxShadow = '0 4px 0 #e5e7eb'}
             onTouchStart={e => e.currentTarget.style.boxShadow = 'none'}
             onTouchEnd={e => e.currentTarget.style.boxShadow = '0 4px 0 #e5e7eb'}
           >
-            <div className="flex items-center gap-4 w-full min-w-0">
+            <div className="flex items-center gap-4" style={{ minWidth: 0, overflow: 'hidden' }}>
               <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center font-display font-extrabold text-lg text-duo flex-shrink-0">
                 {i + 1}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="font-display font-bold text-lg text-ink truncate">{exam.topic}</p>
+              <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+                <p className="font-display font-bold text-lg text-ink" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{exam.topic}</p>
                 <p className="font-body text-sm text-muted">
                   {exam.questions?.length} questions ·{' '}
                   {new Date(exam.created_at).toLocaleDateString('en', {
