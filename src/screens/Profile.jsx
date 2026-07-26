@@ -8,7 +8,7 @@ function CoinIcon({ size = 24 }) {
   return <img src="/coin.png" width={size} height={size} alt="coin" style={{ objectFit: 'contain' }} />
 }
 
-const AVATARS = ['🦁', '🐯', '🐻', '🦊', '🐼', '🐸', '🦋', '🐬', '🦄', '🐙']
+const AVATARS = ['🪐', '🌍', '🌙', '⭐', '🌟', '☀️', '🌎', '🌏', '🌑', '💫']
 
 export default function Profile({ onLogout }) {
   const lang = useLang()
