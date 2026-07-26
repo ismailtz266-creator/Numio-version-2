@@ -1,22 +1,19 @@
-export default function Revision({ chapter, exams, onSelectExam, onBack }) {
-  return (
-    <div className="bg-white flex flex-col" style={{ height: '100dvh', overflow: 'hidden' }}>
+import { useLang } from '../lib/LangContext'
+import { t } from '../lib/i18n'
 
-      {/* Header */}
+export default function Revision({ chapter, exams, onSelectExam, onBack }) {
+  const lang = useLang()
+  return (
+    <div className="bg-white flex flex-col" style={{ height: '100dvh', overflow: 'hidden', maxWidth: '100vw' }}>
       <div className="flex-shrink-0 px-5 pt-12 pb-6">
-        <button
-          onClick={onBack}
-          className="text-muted font-body font-bold text-sm mb-4 flex items-center gap-1 active:opacity-60"
-        >
-          ← Back
+        <button onClick={onBack} className="text-muted font-body font-bold text-sm mb-4 flex items-center gap-1 active:opacity-60">
+          {t(lang, 'revision_back')}
         </button>
-        <h1 className="font-display font-extrabold text-3xl text-ink">Revision</h1>
+        <h1 className="font-display font-extrabold text-3xl text-ink">{t(lang, 'revision_title')}</h1>
         <p className="text-muted font-body text-sm mt-1">
-          {chapter.emoji} {chapter.name} · {exams.length} exam{exams.length !== 1 ? 's' : ''}
+          {chapter.emoji} {chapter.name} · {t(lang, 'revision_exam', exams.length)}
         </p>
       </div>
-
-      {/* Exams list — scrollable, clipped */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden pb-10 flex flex-col gap-3" style={{ padding: '0 20px 40px' }}>
         {exams.map((exam, i) => (
           <button
@@ -36,8 +33,8 @@ export default function Revision({ chapter, exams, onSelectExam, onBack }) {
               <div className="flex-1 min-w-0 overflow-hidden">
                 <p className="font-display font-bold text-lg text-ink truncate">{exam.topic}</p>
                 <p className="font-body text-sm text-muted truncate">
-                  {exam.questions?.length} questions ·{' '}
-                  {new Date(exam.created_at).toLocaleDateString('en', {
+                  {t(lang, 'current_questions', exam.questions?.length)} ·{' '}
+                  {new Date(exam.created_at).toLocaleDateString(lang === 'ar' ? 'ar-SA' : 'en', {
                     month: 'short', day: 'numeric', year: 'numeric'
                   })}
                 </p>
