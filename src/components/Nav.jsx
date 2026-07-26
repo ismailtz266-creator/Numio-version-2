@@ -1,4 +1,4 @@
-import { BookOpen, Gift, Users } from 'lucide-react'
+import { BookOpen, Gift, Users, User } from 'lucide-react'
 import { useLang } from '../lib/LangContext'
 import { t } from '../lib/i18n'
 
@@ -18,6 +18,7 @@ export default function Nav({ active, onChange, streak = 0 }) {
     { id: 'chapters',    label: t(lang, 'nav_chapters'),    Icon: BookOpen },
     { id: 'rewards',     label: t(lang, 'nav_rewards'),     Icon: Gift     },
     { id: 'parent_zone', label: t(lang, 'nav_parent_zone'), Icon: Users    },
+    { id: 'profile',     label: lang === 'ar' ? 'الملف' : 'Profile', Icon: User },
   ]
 
   return (
