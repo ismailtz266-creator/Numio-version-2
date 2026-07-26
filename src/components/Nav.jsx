@@ -48,21 +48,21 @@ export default function Nav({ active, onChange, streak = 0 }) {
       {/* Desktop sidebar */}
       <aside className="hidden md:flex fixed top-0 left-0 bottom-0 w-56 bg-white border-r border-gray-100 flex-col z-40 overflow-hidden">
         {/* Logo + mascot */}
-        <div className="relative flex items-center px-5 pt-6 pb-4 mb-2">
+        <div className="relative flex items-center px-4 pt-4 pb-2 mb-4" style={{ height: 80 }}>
           <img
             src="/mascot.png"
             alt=""
             style={{
               position: 'absolute',
-              left: -18,
-              bottom: -10,
-              height: 90,
+              left: -24,
+              bottom: -16,
+              height: 110,
               width: 'auto',
               objectFit: 'contain',
               zIndex: 0,
             }}
           />
-          <span className="font-display font-extrabold text-2xl text-duo relative z-10 ml-14">
+          <span className="font-display font-extrabold text-2xl text-duo relative z-10 ml-16">
             Numio
           </span>
           <div className="ml-auto relative z-10">
