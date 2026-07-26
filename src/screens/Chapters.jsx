@@ -20,17 +20,17 @@ const BANNER_COLORS = [
   { bg: '#fee2e2', border: '#fca5a5' },
 ]
 
-export default function Chapters({ onSelectChapter }) {
+export default function Chapters({ onSelectChapter, kidId }) {
   const lang = useLang()
   const [chapters, setChapters]   = useState([])
   const [loading, setLoading]     = useState(true)
   const [showModal, setShowModal] = useState(false)
 
-  useEffect(() => { loadChapters() }, [])
+  useEffect(() => { if (kidId) loadChapters() }, [kidId])
 
   async function loadChapters() {
     try {
-      const data = await getChapters()
+      const data = await getChapters(kidId)
       setChapters(data)
     } catch (err) {
       console.error('Failed to load chapters:', err)
@@ -41,7 +41,7 @@ export default function Chapters({ onSelectChapter }) {
 
   async function handleCreate(name, emoji) {
     try {
-      const chapter = await createChapter({ name, emoji })
+      const chapter = await createChapter({ name, emoji, kidId })
       setChapters(prev => [...prev, chapter])
       setShowModal(false)
     } catch (err) {
