@@ -79,6 +79,9 @@ export default function Onboarding({ onComplete }) {
         password: pin + pin.slice(0, 2), // pad to 6 chars — Supabase minimum
       })
       if (error) throw error
+      // Save PIN to profile so Parent Zone can verify it
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user) await supabase.from('profiles').upsert({ id: user.id, parent_pin: pin })
       setScreen('graffiti')
     } catch (e) {
       setAuthError(e.message || 'Something went wrong')
