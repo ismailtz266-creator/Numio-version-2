@@ -19,8 +19,8 @@ export default function CurrentChapter({ chapter, onNew, onRevision, onBack }) {
   }
 
   return (
-    <div className="bg-white flex flex-col" style={{ height: '100dvh', overflow: 'hidden' }}>
-      <div className="w-full max-w-2xl mx-auto px-5 flex flex-col flex-1 overflow-y-auto pb-10 min-w-0">
+    <div className="bg-white flex flex-col" style={{ height: '100dvh', overflow: 'hidden', maxWidth: '100vw' }}>
+      <div className="w-full max-w-2xl mx-auto px-5 flex flex-col flex-1 overflow-y-auto overflow-x-hidden pb-10 min-w-0">
 
         {/* Header */}
         <div className="pt-12 pb-6">
@@ -100,11 +100,11 @@ function ExamRow({ exam }) {
     month: 'short', day: 'numeric'
   })
   return (
-    <div className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3">
-      <span style={{ fontSize: 24 }}>📝</span>
-      <div className="flex-1 min-w-0">
+    <div className="flex items-center gap-3 bg-gray-50 rounded-2xl px-4 py-3 overflow-hidden">
+      <span className="flex-shrink-0" style={{ fontSize: 24 }}>📝</span>
+      <div className="flex-1 min-w-0 overflow-hidden">
         <p className="font-display font-bold text-base text-ink truncate">{exam.topic}</p>
-        <p className="font-body text-xs text-muted">{exam.questions?.length} questions · {date}</p>
+        <p className="font-body text-xs text-muted truncate">{exam.questions?.length} questions · {date}</p>
       </div>
     </div>
   )
