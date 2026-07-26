@@ -2,20 +2,21 @@ import { supabase } from './supabaseClient'
 
 // ── Chapters ──────────────────────────────────────────────────────
 
-export async function getChapters() {
+export async function getChapters(kidId) {
   const { data, error } = await supabase
     .from('chapters')
     .select('*')
+    .eq('kid_id', kidId)
     .order('created_at', { ascending: true })
   if (error) throw error
   return data
 }
 
-export async function createChapter({ name, emoji }) {
+export async function createChapter({ name, emoji, kidId }) {
   const { data: { user } } = await supabase.auth.getUser()
   const { data, error } = await supabase
     .from('chapters')
-    .insert({ name, emoji, user_id: user.id })
+    .insert({ name, emoji, user_id: user.id, kid_id: kidId })
     .select()
     .single()
   if (error) throw error
@@ -39,11 +40,11 @@ export async function getExamsForChapter(chapterId) {
   return data
 }
 
-export async function saveExam({ chapterId, topic, questions }) {
+export async function saveExam({ chapterId, topic, questions, kidId }) {
   const { data: { user } } = await supabase.auth.getUser()
   const { data, error } = await supabase
     .from('exams')
-    .insert({ chapter_id: chapterId, topic, questions, user_id: user.id })
+    .insert({ chapter_id: chapterId, topic, questions, user_id: user.id, kid_id: kidId })
     .select()
     .single()
   if (error) throw error
