@@ -59,7 +59,7 @@ function QuitPopup({ visible, onStay, onLeave }) {
 }
 
 // ── Results screen ────────────────────────────────────────────────
-function ResultsScreen({ questions, answers, topic, onDone, coinsSaved }) {
+function ResultsScreen({ questions, answers, topic, onDone, coinsEarned }) {
   const correct = questions.filter((q, i) => {
     const a = answers[i]
     return normalize(a) === normalize(q.correct_answer)
@@ -101,7 +101,7 @@ function ResultsScreen({ questions, answers, topic, onDone, coinsSaved }) {
           <CoinIcon size={40} />
           <div>
             <p className="font-body text-xs text-amber-600 font-bold uppercase tracking-widest">Coins earned</p>
-            <p className="font-display font-extrabold text-3xl text-amber-500">+{COINS_PER_QUIZ}</p>
+            <p className="font-display font-extrabold text-3xl text-amber-500">+{coinsEarned}</p>
           </div>
         </div>
 
@@ -274,6 +274,7 @@ export default function Quiz({ exam, onDone }) {
         answers={answers}
         topic={topic}
         onDone={onDone}
+        coinsEarned={COINS_PER_QUESTION * total}
       />
     )
   }
