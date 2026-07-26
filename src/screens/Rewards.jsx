@@ -7,7 +7,7 @@ function CoinIcon({ size = 24 }) {
   return <img src="/coin.png" width={size} height={size} alt="coin" style={{ objectFit: 'contain' }} />
 }
 
-export default function Rewards() {
+export default function Rewards({ kidId }) {
   const lang = useLang()
   const [rewards, setRewards]   = useState([])
   const [claims, setClaims]     = useState([])
@@ -16,11 +16,11 @@ export default function Rewards() {
   const [claiming, setClaiming] = useState(null)
   const [tab, setTab]           = useState('rewards')
 
-  useEffect(() => { load() }, [])
+  useEffect(() => { load() }, [kidId])
 
   async function load() {
     try {
-      const [r, b, c] = await Promise.all([getRewards(), getCoinBalance(), getClaims()])
+      const [r, b, c] = await Promise.all([getRewards(), getCoinBalance(kidId), getClaims(kidId)])
       setRewards(r); setBalance(b); setClaims(c)
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
@@ -30,7 +30,7 @@ export default function Rewards() {
     if (balance < reward.cost) return
     setClaiming(reward.id)
     try {
-      const { newBalance } = await claimReward(reward.id, reward.cost)
+      const { newBalance } = await claimReward(reward.id, reward.cost, kidId)
       setBalance(newBalance)
       await load()
     } catch (e) { alert(e.message) }
