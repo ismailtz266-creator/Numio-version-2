@@ -46,15 +46,31 @@ export default function Nav({ active, onChange, streak = 0 }) {
       </nav>
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex fixed top-0 left-0 bottom-0 w-56 bg-white border-r border-gray-100 flex-col py-8 px-4 z-40">
-        <div className="mb-10 px-2 flex items-center justify-between">
-          <span className="font-display font-extrabold text-2xl text-ink">
-            Numio <span className="text-duo">Scan</span>
+      <aside className="hidden md:flex fixed top-0 left-0 bottom-0 w-56 bg-white border-r border-gray-100 flex-col z-40 overflow-hidden">
+        {/* Logo + mascot */}
+        <div className="relative flex items-center px-5 pt-6 pb-4 mb-2">
+          <img
+            src="/mascot.png"
+            alt=""
+            style={{
+              position: 'absolute',
+              left: -18,
+              bottom: -10,
+              height: 90,
+              width: 'auto',
+              objectFit: 'contain',
+              zIndex: 0,
+            }}
+          />
+          <span className="font-display font-extrabold text-2xl text-duo relative z-10 ml-14">
+            Numio
           </span>
-          <StreakBadge count={streak} />
+          <div className="ml-auto relative z-10">
+            <StreakBadge count={streak} />
+          </div>
         </div>
 
-        <div className="flex flex-col gap-1">
+        <div className="flex flex-col gap-1 px-3 flex-1">
           {TABS.map(({ id, label, Icon }) => {
             const isActive = active === id
             return (
