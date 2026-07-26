@@ -32,7 +32,7 @@ export default function Profile({ onLogout }) {
 
   return (
     <div className="bg-white flex flex-col" style={{ height: '100dvh', overflow: 'hidden' }}>
-      <div className="flex-1 overflow-y-auto px-5 pt-12 pb-10">
+      <div className="flex-1 overflow-y-auto px-5 pt-12 pb-10 max-w-lg mx-auto w-full">
         <h1 className="font-display font-extrabold text-3xl text-ink mb-8">
           {lang === 'ar' ? 'الملف الشخصي' : 'Profile'}
         </h1>
