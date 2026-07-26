@@ -19,6 +19,7 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false)
   const [streak, setStreak] = useState(0)
   const [onboarded, setOnboarded] = useState(null) // null=checking, true, false
+  const [tab, setTab]             = useState('chapters')
   const [pinUnlocked, setPinUnlocked] = useState(false)
 
   // Single nav state object — screen + all associated data
