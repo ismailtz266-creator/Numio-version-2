@@ -81,7 +81,7 @@ export default function App() {
   const showNav = !HIDE_NAV.includes(screen)
 
   return (
-    <div className="flex">
+    <div className="flex" style={{ overflow: 'hidden', maxWidth: '100vw', width: '100%' }}>
       {showNav && <Nav active={tab} onChange={handleTabChange} streak={streak} />}
 
       <main
