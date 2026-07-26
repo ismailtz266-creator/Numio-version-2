@@ -10,6 +10,7 @@ import Revision from './screens/Revision'
 import Quiz from './screens/Quiz'
 import Rewards from './screens/Rewards'
 import ParentZone from './screens/ParentZone'
+import PinGate from './screens/PinGate'
 import QuizIntro from './screens/QuizIntro'
 
 const HIDE_NAV = ['quiz', 'scan', 'quiz_intro']
@@ -18,7 +19,7 @@ export default function App() {
   const [authReady, setAuthReady] = useState(false)
   const [streak, setStreak] = useState(0)
   const [onboarded, setOnboarded] = useState(null) // null=checking, true, false
-  const [tab, setTab]             = useState('chapters')
+  const [pinUnlocked, setPinUnlocked] = useState(false)
 
   // Single nav state object — screen + all associated data
   // Updating one object = one React render, no race conditions
@@ -75,6 +76,7 @@ export default function App() {
 
   function handleTabChange(newTab) {
     setTab(newTab)
+    if (newTab !== 'parent_zone') setPinUnlocked(false)
     go({ screen: newTab, chapter: null, exam: null, revisionExams: [] })
   }
 
@@ -138,7 +140,13 @@ export default function App() {
         )}
 
         {screen === 'rewards'     && <Rewards />}
-        {screen === 'parent_zone' && <ParentZone />}
+        {screen === 'parent_zone' && !pinUnlocked && (
+          <PinGate
+            onSuccess={() => setPinUnlocked(true)}
+            onBack={() => go({ screen: 'chapters' })}
+          />
+        )}
+        {screen === 'parent_zone' && pinUnlocked && <ParentZone />}
       </main>
     </div>
   )
