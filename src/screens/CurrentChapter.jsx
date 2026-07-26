@@ -20,7 +20,7 @@ export default function CurrentChapter({ chapter, onNew, onRevision, onBack }) {
 
   return (
     <div className="bg-white flex flex-col" style={{ height: '100dvh', overflow: 'hidden' }}>
-      <div className="w-full max-w-2xl mx-auto px-5 flex flex-col flex-1 overflow-y-auto pb-10">
+      <div className="w-full max-w-2xl mx-auto px-5 flex flex-col flex-1 overflow-y-auto pb-10 min-w-0">
 
         {/* Header */}
         <div className="pt-12 pb-6">
