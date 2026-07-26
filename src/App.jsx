@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { ensureAuth } from './lib/auth'
 import Onboarding from './screens/Onboarding'
 import { getStreak } from './lib/economy'
+import { getKids, createKid } from './lib/kids'
 import Nav from './components/Nav'
 import Chapters from './screens/Chapters'
 import CurrentChapter from './screens/CurrentChapter'
@@ -12,48 +13,61 @@ import Rewards from './screens/Rewards'
 import ParentZone from './screens/ParentZone'
 import PinGate from './screens/PinGate'
 import QuizIntro from './screens/QuizIntro'
+import Profile from './screens/Profile'
 import { LangContext } from './lib/LangContext'
+import { KidContext } from './lib/KidContext'
 
 const HIDE_NAV = ['quiz', 'scan', 'quiz_intro']
 
 export default function App() {
-  const [authReady, setAuthReady] = useState(false)
-  const [streak, setStreak] = useState(0)
-  const [lang, setLang] = useState('en')
-  const [onboarded, setOnboarded] = useState(null)
-  const [tab, setTab]             = useState('chapters')
+  const [authReady, setAuthReady]     = useState(false)
+  const [streak, setStreak]           = useState(0)
+  const [lang, setLang]               = useState('en')
+  const [onboarded, setOnboarded]     = useState(null)
+  const [tab, setTab]                 = useState('chapters')
   const [pinUnlocked, setPinUnlocked] = useState(false)
+  const [kids, setKids]               = useState([])
+  const [activeKid, setActiveKid]     = useState(null)
 
-  // Single nav state object — screen + all associated data
-  // Updating one object = one React render, no race conditions
   const [nav, setNav] = useState({
-    screen:        'chapters',
-    chapter:       null,
-    exam:          null,
-    revisionExams: [],
+    screen: 'chapters', chapter: null, exam: null, revisionExams: [],
   })
 
   useEffect(() => {
     ensureAuth().then(async () => {
       try {
-        const { data: { user } } = await (await import('./lib/supabaseClient')).supabase.auth.getUser()
-        if (!user || user.is_anonymous) {
-          setOnboarded(false)
-          return
-        }
-        // Check if profile has display_name
         const { supabase } = await import('./lib/supabaseClient')
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user || user.is_anonymous) { setOnboarded(false); return }
+
         const { data } = await supabase.from('profiles').select('display_name, language').eq('id', user.id).single()
         setOnboarded(!!data?.display_name)
         if (data?.language) setLang(data.language)
+
         if (data?.display_name) {
-          getStreak().then(s => setStreak(s.count)).catch(() => {})
+          // Load kids
+          const kidList = await getKids()
+          if (kidList.length === 0) {
+            // Migrate: create first kid from display_name
+            const firstKid = await createKid(data.display_name)
+            setKids([firstKid])
+            setActiveKid(firstKid)
+            getStreak(firstKid.id).then(s => setStreak(s.count)).catch(() => {})
+          } else {
+            setKids(kidList)
+            setActiveKid(kidList[0])
+            getStreak(kidList[0].id).then(s => setStreak(s.count)).catch(() => {})
+          }
         }
-      } catch {
-        setOnboarded(false)
-      }
+      } catch { setOnboarded(false) }
     }).finally(() => setAuthReady(true))
   }, [])
+
+  // When active kid changes, reload streak
+  useEffect(() => {
+    if (!activeKid) return
+    getStreak(activeKid.id).then(s => setStreak(s.count)).catch(() => {})
+  }, [activeKid?.id])
 
   if (!authReady || onboarded === null) {
     return (
@@ -67,10 +81,23 @@ export default function App() {
     return (
       <LangContext.Provider value={lang}>
         <div dir={lang === 'ar' ? 'rtl' : 'ltr'}>
-          <Onboarding onComplete={() => {
-            setOnboarded(true)
-            getStreak().then(s => setStreak(s.count)).catch(() => {})
-          }} onLanguageChange={setLang} />
+          <Onboarding
+            onComplete={async (kidName) => {
+              setOnboarded(true)
+              const kidList = await getKids()
+              let kid
+              if (kidList.length === 0) {
+                kid = await createKid(kidName || 'Kid 1')
+                setKids([kid])
+              } else {
+                setKids(kidList)
+                kid = kidList[0]
+              }
+              setActiveKid(kid)
+              getStreak(kid.id).then(s => setStreak(s.count)).catch(() => {})
+            }}
+            onLanguageChange={setLang}
+          />
         </div>
       </LangContext.Provider>
     )
@@ -78,9 +105,7 @@ export default function App() {
 
   const { screen, chapter, exam, revisionExams } = nav
 
-  function go(updates) {
-    setNav(prev => ({ ...prev, ...updates }))
-  }
+  function go(updates) { setNav(prev => ({ ...prev, ...updates })) }
 
   function handleTabChange(newTab) {
     setTab(newTab)
@@ -90,78 +115,104 @@ export default function App() {
 
   const showNav = !HIDE_NAV.includes(screen)
 
+  const kidContextValue = {
+    activeKid,
+    kids,
+    setActiveKid: (kid) => {
+      setActiveKid(kid)
+      // Reset to chapters when switching kid
+      go({ screen: 'chapters', chapter: null, exam: null, revisionExams: [] })
+      setTab('chapters')
+    },
+    setKids,
+  }
+
   return (
     <LangContext.Provider value={lang}>
-      <div
-        className="flex"
-        dir={lang === 'ar' ? 'rtl' : 'ltr'}
-        style={{ overflow: 'hidden', maxWidth: '100vw', width: '100%' }}
-      >
-      {showNav && <Nav active={tab} onChange={handleTabChange} streak={streak} />}
+      <KidContext.Provider value={kidContextValue}>
+        <div className="flex" dir={lang === 'ar' ? 'rtl' : 'ltr'}
+          style={{ overflow: 'hidden', maxWidth: '100vw', width: '100%' }}>
 
-      <main
-        className={`flex-1 ${showNav ? 'md:ml-56' : ''}`}
-        style={{ paddingBottom: showNav ? 'calc(64px + env(safe-area-inset-bottom))' : 0, overflow: 'hidden', minWidth: 0, width: '100%' }}
-      >
-        {screen === 'chapters' && (
-          <Chapters
-            onSelectChapter={c => go({ screen: 'current_chapter', chapter: c })}
-          />
-        )}
+          {showNav && <Nav active={tab} onChange={handleTabChange} streak={streak} />}
 
-        {screen === 'current_chapter' && (
-          <CurrentChapter
-            chapter={chapter}
-            onNew={c => go({ screen: 'scan', chapter: c, exam: null })}
-            onRevision={(c, exams) => go({ screen: 'revision', chapter: c, revisionExams: exams })}
-            onBack={() => go({ screen: 'chapters' })}
-          />
-        )}
+          <main
+            className={`flex-1 ${showNav ? 'md:ml-56' : ''}`}
+            style={{ paddingBottom: showNav ? 'calc(64px + env(safe-area-inset-bottom))' : 0, overflow: 'hidden', minWidth: 0, width: '100%' }}
+          >
+            {screen === 'chapters' && (
+              <Chapters
+                kidId={activeKid?.id}
+                onSelectChapter={c => go({ screen: 'current_chapter', chapter: c })}
+              />
+            )}
 
-        {screen === 'scan' && (
-          <Home
-            chapter={chapter}
-            onExamReady={freshExam => {
-              console.log('✅ Navigating to quiz_intro with exam:', freshExam.topic)
-              go({ screen: 'quiz_intro', exam: freshExam })
-            }}
-            onBack={() => go({ screen: 'current_chapter' })}
-          />
-        )}
+            {screen === 'current_chapter' && (
+              <CurrentChapter
+                chapter={chapter}
+                kidId={activeKid?.id}
+                onNew={c => go({ screen: 'scan', chapter: c, exam: null })}
+                onRevision={(c, exams) => go({ screen: 'revision', chapter: c, revisionExams: exams })}
+                onBack={() => go({ screen: 'chapters' })}
+              />
+            )}
 
-        {screen === 'revision' && (
-          <Revision
-            chapter={chapter}
-            exams={revisionExams}
-            onSelectExam={e => go({ screen: 'quiz_intro', exam: e })}
-            onBack={() => go({ screen: 'current_chapter' })}
-          />
-        )}
+            {screen === 'scan' && (
+              <Home
+                chapter={chapter}
+                kidId={activeKid?.id}
+                onExamReady={freshExam => go({ screen: 'quiz_intro', exam: freshExam })}
+                onBack={() => go({ screen: 'current_chapter' })}
+              />
+            )}
 
-        {screen === 'quiz_intro' && exam && (
-          <QuizIntro
-            exam={exam}
-            onStart={() => go({ screen: 'quiz' })}
-          />
-        )}
+            {screen === 'revision' && (
+              <Revision
+                chapter={chapter}
+                exams={revisionExams}
+                onSelectExam={e => go({ screen: 'quiz_intro', exam: e })}
+                onBack={() => go({ screen: 'current_chapter' })}
+              />
+            )}
 
-        {screen === 'quiz' && exam && (
-          <Quiz
-            exam={exam}
-            onDone={() => go({ screen: 'current_chapter' })}
-          />
-        )}
+            {screen === 'quiz_intro' && exam && (
+              <QuizIntro
+                exam={exam}
+                kidName={activeKid?.name}
+                onStart={() => go({ screen: 'quiz' })}
+              />
+            )}
 
-        {screen === 'rewards'     && <Rewards />}
-        {screen === 'parent_zone' && !pinUnlocked && (
-          <PinGate
-            onSuccess={() => setPinUnlocked(true)}
-            onBack={() => go({ screen: 'chapters' })}
-          />
-        )}
-        {screen === 'parent_zone' && pinUnlocked && <ParentZone />}
-      </main>
-      </div>
+            {screen === 'quiz' && exam && (
+              <Quiz
+                exam={exam}
+                kidId={activeKid?.id}
+                onDone={() => {
+                  go({ screen: 'current_chapter' })
+                  // Refresh streak
+                  if (activeKid) getStreak(activeKid.id).then(s => setStreak(s.count)).catch(() => {})
+                }}
+              />
+            )}
+
+            {screen === 'rewards'     && <Rewards kidId={activeKid?.id} />}
+
+            {screen === 'parent_zone' && !pinUnlocked && (
+              <PinGate onSuccess={() => setPinUnlocked(true)} onBack={() => go({ screen: 'chapters' })} />
+            )}
+            {screen === 'parent_zone' && pinUnlocked && <ParentZone />}
+
+            {screen === 'profile' && (
+              <Profile
+                onLogout={() => {
+                  setOnboarded(false)
+                  setKids([])
+                  setActiveKid(null)
+                }}
+              />
+            )}
+          </main>
+        </div>
+      </KidContext.Provider>
     </LangContext.Provider>
   )
 }
