@@ -98,6 +98,7 @@ export default function Onboarding({ onComplete }) {
       await supabase.from('profiles').upsert({
         id: user.id,
         display_name: name.trim(),
+        language: language || 'en',
         coin_balance: 0,
         streak_count: 0,
       })
