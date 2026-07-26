@@ -4,7 +4,7 @@ import StreakPopup from './StreakPopup'
 import { useLang } from '../lib/LangContext'
 import { t } from '../lib/i18n'
 
-const COINS_PER_QUIZ = 20
+const COINS_PER_QUESTION = 2
 
 // ── Coin icon ─────────────────────────────────────────────────────
 function CoinIcon({ size = 28 }) {
@@ -229,7 +229,7 @@ export default function Quiz({ exam, onDone }) {
       // Last question — award coins + update streak, then show results
       setSaving(true)
       try {
-        await addCoins(COINS_PER_QUIZ)
+        await addCoins(COINS_PER_QUESTION * total)
         const { streakCount: sc, isNewDay } = await updateStreak()
         if (isNewDay) {
           setStreakCount(sc)
@@ -302,7 +302,7 @@ export default function Quiz({ exam, onDone }) {
           </div>
           <div className="flex items-center gap-1">
             <CoinIcon size={24} />
-            <span className="font-display font-bold text-sm text-amber-500">{COINS_PER_QUIZ}</span>
+            <span className="font-display font-bold text-sm text-amber-500">{COINS_PER_QUESTION * total}</span>
           </div>
           <span className="font-display font-bold text-sm text-muted">{idx + 1}/{total}</span>
         </div>
