@@ -36,7 +36,7 @@ function OptionCard({ label, icon, selected, onSelect }) {
 }
 
 // ── Main Onboarding ───────────────────────────────────────────────
-export default function Onboarding({ onComplete }) {
+export default function Onboarding({ onComplete, onLanguageChange }) {
   const [screen, setScreen] = useState('welcome') // welcome|language|goal|account|graffiti|name|how
   const [mascotSmall, setMascotSmall] = useState(false)
 
@@ -155,7 +155,7 @@ export default function Onboarding({ onComplete }) {
           { label: 'العربية', icon: '🇸🇦', value: 'ar' },
         ]}
         selected={language}
-        onSelect={setLanguage}
+        onSelect={val => { setLanguage(val); onLanguageChange?.(val) }}
         onNext={() => goTo('goal')}
       />
     )
