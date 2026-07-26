@@ -205,7 +205,7 @@ function XIcon() {
 }
 
 // ── Main Quiz ─────────────────────────────────────────────────────
-export default function Quiz({ exam, onDone }) {
+export default function Quiz({ exam, onDone, kidId }) {
   const lang = useLang()
   const questions = exam.questions || []
   const topic     = exam.topic || 'Quiz'
@@ -240,8 +240,8 @@ export default function Quiz({ exam, onDone }) {
       // Last question — award coins + update streak, then show results
       setSaving(true)
       try {
-        await addCoins(COINS_PER_QUESTION * total)
-        const { streakCount: sc, isNewDay } = await updateStreak()
+        await addCoins(COINS_PER_QUESTION * total, kidId)
+        const { streakCount: sc, isNewDay } = await updateStreak(kidId)
         if (isNewDay) {
           setStreakCount(sc)
           setShowStreak(true)
