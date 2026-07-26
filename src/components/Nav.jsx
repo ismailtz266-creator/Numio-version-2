@@ -54,7 +54,7 @@ export default function Nav({ active, onChange, streak = 0 }) {
             alt=""
             style={{
               position: 'absolute',
-              left: -24,
+              left: -8,
               bottom: -16,
               height: 110,
               width: 'auto',
@@ -62,7 +62,7 @@ export default function Nav({ active, onChange, streak = 0 }) {
               zIndex: 0,
             }}
           />
-          <span className="font-display font-extrabold text-2xl text-duo relative z-10 ml-16">
+          <span className="font-display font-extrabold text-2xl text-duo relative z-10 ml-10">
             Numio
           </span>
           <div className="ml-auto relative z-10">
