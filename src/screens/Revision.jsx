@@ -1,6 +1,6 @@
 export default function Revision({ chapter, exams, onSelectExam, onBack }) {
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="bg-white flex flex-col" style={{ height: '100dvh', overflow: 'hidden' }}>
 
       {/* Header */}
       <div className="px-5 pt-12 pb-6">
@@ -17,7 +17,7 @@ export default function Revision({ chapter, exams, onSelectExam, onBack }) {
       </div>
 
       {/* Exams list */}
-      <div className="px-5 flex flex-col gap-3 pb-10">
+      <div className="px-5 flex flex-col gap-3 pb-10 overflow-y-auto flex-1 min-w-0">
         {exams.map((exam, i) => (
           <button
             key={exam.id}
