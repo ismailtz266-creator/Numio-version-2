@@ -86,7 +86,7 @@ export default function App() {
 
       <main
         className={`flex-1 ${showNav ? 'md:ml-56' : ''}`}
-        style={{ paddingBottom: showNav ? 'calc(64px + env(safe-area-inset-bottom))' : 0 }}
+        style={{ paddingBottom: showNav ? 'calc(64px + env(safe-area-inset-bottom))' : 0, overflow: 'hidden', minWidth: 0, width: '100%' }}
       >
         {screen === 'chapters' && (
           <Chapters
