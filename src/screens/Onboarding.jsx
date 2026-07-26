@@ -10,10 +10,10 @@ const STRINGS = {
     lang_question: 'What language do you prefer?',
     goal_question: 'Why do you want to use Numio?',
     goal_options: [
-      { label: 'Get better at school', icon: '📈', value: 'improve' },
-      { label: 'Prepare for an exam', icon: '📝', value: 'exam' },
-      { label: 'Review my lessons', icon: '🔄', value: 'review' },
-      { label: 'Just curious!', icon: '✨', value: 'curious' },
+      { label: 'Help my child do better at school', icon: '📈', value: 'improve' },
+      { label: 'Help my child prepare for exams', icon: '🎯', value: 'exam' },
+      { label: 'Build better study habits', icon: '💪', value: 'habits' },
+      { label: 'Help my child feel more confident', icon: '😊', value: 'confidence' },
     ],
     how_title: "Here's how it works",
     how_sub: '3 simple steps to learning 🚀',
@@ -48,10 +48,10 @@ const STRINGS = {
     lang_question: 'ما اللغة التي تفضلها؟',
     goal_question: 'لماذا تريد استخدام Numio؟',
     goal_options: [
-      { label: 'أتحسن في المدرسة', icon: '📈', value: 'improve' },
-      { label: 'أستعد لامتحان قادم', icon: '📝', value: 'exam' },
-      { label: 'أراجع دروسي', icon: '🔄', value: 'review' },
-      { label: 'مجرد فضول!', icon: '✨', value: 'curious' },
+      { label: 'مساعدة طفلي على التفوق في المدرسة', icon: '📈', value: 'improve' },
+      { label: 'مساعدة طفلي على الاستعداد للامتحانات', icon: '🎯', value: 'exam' },
+      { label: 'بناء عادات دراسية أفضل', icon: '💪', value: 'habits' },
+      { label: 'مساعدة طفلي على الشعور بالثقة', icon: '😊', value: 'confidence' },
     ],
     how_title: 'كيف يعمل التطبيق',
     how_sub: '٣ خطوات بسيطة للتعلم 🚀',
@@ -165,9 +165,7 @@ export default function Onboarding({ onComplete, onLanguageChange }) {
   }
 
   useEffect(() => {
-    if (screen !== 'graffiti') return
-    const t = setTimeout(() => setScreen('name'), 3000)
-    return () => clearTimeout(t)
+    // no auto-advance — user taps Continue
   }, [screen])
 
   // ── WELCOME ───────────────────────────────────────────────────────
@@ -202,7 +200,7 @@ export default function Onboarding({ onComplete, onLanguageChange }) {
           </div>
         </div>
         <div className="flex flex-col gap-3 flex-1">
-          <OptionCard label="English" icon="🇬🇧" selected={language === 'en'} onSelect={() => { setLanguage('en'); onLanguageChange?.('en') }} />
+          <OptionCard label="English" icon="🇺🇸" selected={language === 'en'} onSelect={() => { setLanguage('en'); onLanguageChange?.('en') }} />
           <OptionCard label="العربية" icon="🇸🇦" selected={language === 'ar'} onSelect={() => { setLanguage('ar'); onLanguageChange?.('ar') }} />
         </div>
         <div className="flex-shrink-0 pb-8 pt-4">
@@ -341,6 +339,13 @@ export default function Onboarding({ onComplete, onLanguageChange }) {
           <h1 className="font-display font-extrabold text-5xl text-ink">{s.welcome_back}</h1>
           <p className="font-body text-lg text-muted mt-2">{s.account_ready}</p>
         </div>
+        <button
+          onClick={() => setScreen('name')}
+          className="w-full max-w-xs bg-duo text-white font-display font-bold text-xl rounded-2xl py-5 shadow-[0_4px_0_#58a700] active:shadow-none active:translate-y-1 transition-all"
+          style={{ position: 'relative', zIndex: 1, animation: 'pop-in 0.5s 0.3s cubic-bezier(0.34,1.56,0.64,1) both' }}
+        >
+          {s.continue}
+        </button>
         <style>{`
           @keyframes pop-in { from { opacity: 0; transform: scale(0.5); } to { opacity: 1; transform: scale(1); } }
           @keyframes confetti-rise { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(-110vh) rotate(720deg); opacity: 0; } }
