@@ -4,7 +4,7 @@ import { saveExam } from '../lib/chapters'
 import { useLang } from '../lib/LangContext'
 import { t } from '../lib/i18n'
 
-export default function Home({ chapter, onExamReady, onBack }) {
+export default function Home({ chapter, onExamReady, onBack, kidId }) {
   const lang = useLang()
   const fileInputRef = useRef(null)
   const [status, setStatus]   = useState('idle')
@@ -21,7 +21,7 @@ export default function Home({ chapter, onExamReady, onBack }) {
     try {
       const exam = await generateExam(file)
       onExamReady(exam)
-      saveExam({ chapterId: chapter.id, topic: exam.topic, questions: exam.questions })
+      saveExam({ chapterId: chapter.id, topic: exam.topic, questions: exam.questions, kidId })
         .catch(err => console.error('Failed to save exam:', err))
     } catch (err) {
       setError(err.message)
