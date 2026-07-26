@@ -1,16 +1,19 @@
 import { useState, useEffect } from 'react'
 import { getRewards, createReward, deleteReward, getClaims, approveClaim, getCoinBalance } from '../lib/economy'
+import { useLang } from '../lib/LangContext'
+import { t } from '../lib/i18n'
 
 function CoinIcon({ size = 24 }) {
   return <img src="/coin.png" width={size} height={size} alt="coin" style={{ objectFit: 'contain' }} />
 }
 
 export default function ParentZone() {
-  const [rewards, setRewards]   = useState([])
-  const [claims, setClaims]     = useState([])
-  const [balance, setBalance]   = useState(0)
-  const [loading, setLoading]   = useState(true)
-  const [tab, setTab]           = useState('rewards')
+  const lang = useLang()
+  const [rewards, setRewards]     = useState([])
+  const [claims, setClaims]       = useState([])
+  const [balance, setBalance]     = useState(0)
+  const [loading, setLoading]     = useState(true)
+  const [tab, setTab]             = useState('rewards')
   const [showModal, setShowModal] = useState(false)
   const [approving, setApproving] = useState(null)
 
@@ -19,9 +22,7 @@ export default function ParentZone() {
   async function load() {
     try {
       const [r, c, b] = await Promise.all([getRewards(), getClaims(), getCoinBalance()])
-      setRewards(r)
-      setClaims(c)
-      setBalance(b)
+      setRewards(r); setClaims(c); setBalance(b)
     } catch (e) { console.error(e) }
     finally { setLoading(false) }
   }
@@ -56,12 +57,10 @@ export default function ParentZone() {
   return (
     <div className="min-h-screen bg-white flex flex-col" style={{ height: '100dvh' }}>
       <div className="w-full max-w-lg mx-auto px-5 flex flex-col flex-1">
-
-        {/* Header */}
         <div className="flex-shrink-0 pt-12 pb-4 flex items-start justify-between">
           <div>
-            <h1 className="font-display font-extrabold text-3xl text-ink">Parent Zone</h1>
-            <p className="text-muted font-body text-sm mt-1">Manage rewards and approve claims 👨‍👩‍👧</p>
+            <h1 className="font-display font-extrabold text-3xl text-ink">{t(lang, 'parent_title')}</h1>
+            <p className="text-muted font-body text-sm mt-1">{t(lang, 'parent_sub')}</p>
           </div>
           {pendingClaims.length > 0 && (
             <div className="w-7 h-7 rounded-full bg-red-500 flex items-center justify-center">
@@ -70,28 +69,25 @@ export default function ParentZone() {
           )}
         </div>
 
-        {/* Kid's balance */}
         <div className="flex-shrink-0 flex items-center gap-3 bg-amber-50 border-2 border-amber-200 rounded-2xl px-5 py-3 mb-5">
           <CoinIcon size={64} />
           <div>
-            <p className="font-body text-xs text-amber-600 font-bold uppercase tracking-widest">Kid's balance</p>
-            <p className="font-display font-bold text-xl text-amber-500">{balance} coins</p>
+            <p className="font-body text-xs text-amber-600 font-bold uppercase tracking-widest">{t(lang, 'parent_balance_label')}</p>
+            <p className="font-display font-bold text-xl text-amber-500">{balance} {t(lang, 'rewards_balance_unit')}</p>
           </div>
         </div>
 
-        {/* Tabs */}
         <div className="flex-shrink-0 flex gap-2 mb-4">
-          {['rewards', 'claims'].map(t => (
-            <button key={t} onClick={() => setTab(t)}
+          {['rewards', 'claims'].map(tabId => (
+            <button key={tabId} onClick={() => setTab(tabId)}
               className={`flex-1 py-2 rounded-xl font-display font-bold text-sm transition-all relative ${
-                tab === t ? 'bg-duo text-white' : 'bg-gray-100 text-muted'
+                tab === tabId ? 'bg-duo text-white' : 'bg-gray-100 text-muted'
               }`}>
-              {t === 'rewards' ? '🎁 Rewards' : `📋 Claims${pendingClaims.length > 0 ? ` (${pendingClaims.length})` : ''}`}
+              {tabId === 'rewards' ? t(lang, 'parent_tab_rewards') : t(lang, 'parent_tab_claims', pendingClaims.length)}
             </button>
           ))}
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto pb-6">
           {tab === 'rewards' && (
             <div className="flex flex-col gap-3">
@@ -102,21 +98,15 @@ export default function ParentZone() {
                     <p className="font-display font-bold text-base text-ink">{reward.name}</p>
                     <div className="flex items-center gap-1 mt-0.5">
                       <CoinIcon size={14} />
-                      <span className="font-body text-xs text-amber-600 font-bold">{reward.cost} coins</span>
+                      <span className="font-body text-xs text-amber-600 font-bold">{reward.cost} {t(lang, 'rewards_balance_unit')}</span>
                     </div>
                   </div>
-                  <button onClick={() => handleDelete(reward.id)}
-                    className="text-gray-300 font-body text-sm active:text-red-400">
-                    🗑️
-                  </button>
+                  <button onClick={() => handleDelete(reward.id)} className="text-gray-300 font-body text-sm active:text-red-400">🗑️</button>
                 </div>
               ))}
-
-              <button
-                onClick={() => setShowModal(true)}
-                className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-muted font-display font-bold text-base active:bg-gray-50"
-              >
-                + Add Reward
+              <button onClick={() => setShowModal(true)}
+                className="w-full py-4 rounded-2xl border-2 border-dashed border-gray-200 text-muted font-display font-bold text-base active:bg-gray-50">
+                {t(lang, 'parent_add_reward')}
               </button>
             </div>
           )}
@@ -126,7 +116,7 @@ export default function ParentZone() {
               {claims.length === 0 ? (
                 <div className="flex flex-col items-center justify-center pt-20 gap-4 text-center">
                   <span style={{ fontSize: 64 }}>📋</span>
-                  <p className="font-display font-extrabold text-xl text-ink">No claims yet</p>
+                  <p className="font-display font-extrabold text-xl text-ink">{t(lang, 'parent_no_claims')}</p>
                 </div>
               ) : (
                 claims.map(claim => (
@@ -138,7 +128,7 @@ export default function ParentZone() {
                       <p className="font-display font-bold text-base text-ink">{claim.rewards?.name}</p>
                       <div className="flex items-center gap-1">
                         <CoinIcon size={14} />
-                        <span className="font-body text-xs text-amber-600 font-bold">{claim.rewards?.cost} coins</span>
+                        <span className="font-body text-xs text-amber-600 font-bold">{claim.rewards?.cost} {t(lang, 'rewards_balance_unit')}</span>
                       </div>
                     </div>
                     {claim.status === 'pending' && (
@@ -148,7 +138,7 @@ export default function ParentZone() {
                         className="px-4 py-2 rounded-xl bg-duo text-white font-display font-bold text-sm transition-all active:translate-y-0.5"
                         style={{ boxShadow: '0 3px 0 #46a302' }}
                       >
-                        {approving === claim.id ? '...' : 'Approve ✓'}
+                        {approving === claim.id ? '...' : t(lang, 'parent_approve')}
                       </button>
                     )}
                   </div>
@@ -159,25 +149,16 @@ export default function ParentZone() {
         </div>
       </div>
 
-      {showModal && (
-        <RewardModal onConfirm={handleCreate} onClose={() => setShowModal(false)} />
-      )}
+      {showModal && <RewardModal lang={lang} onConfirm={handleCreate} onClose={() => setShowModal(false)} />}
     </div>
   )
 }
 
-function RewardModal({ onConfirm, onClose }) {
-  const [name, setName]   = useState('')
-  const [cost, setCost]   = useState(50)
+function RewardModal({ lang, onConfirm, onClose }) {
+  const [name, setName]     = useState('')
+  const [cost, setCost]     = useState(50)
   const [saving, setSaving] = useState(false)
-
-  const PRESETS = [
-    { label: '30 min TV', cost: 30 },
-    { label: 'Ice cream', cost: 50 },
-    { label: 'Extra screen time', cost: 60 },
-    { label: 'Movie night', cost: 80 },
-    { label: 'Toy/gift', cost: 100 },
-  ]
+  const PRESETS = t(lang, 'parent_presets')
 
   async function handleSubmit() {
     if (!name.trim()) return
@@ -194,11 +175,9 @@ function RewardModal({ onConfirm, onClose }) {
           <div className="w-10 h-1 rounded-full bg-gray-200" />
         </div>
         <div className="flex-1 overflow-y-auto px-5 pb-8 flex flex-col gap-5">
-          <h2 className="font-display font-extrabold text-2xl text-ink text-center pt-2">New Reward</h2>
-
-          {/* Presets */}
+          <h2 className="font-display font-extrabold text-2xl text-ink text-center pt-2">{t(lang, 'parent_modal_title')}</h2>
           <div className="flex flex-col gap-2">
-            <label className="font-body font-bold text-xs text-muted uppercase tracking-widest">Quick presets</label>
+            <label className="font-body font-bold text-xs text-muted uppercase tracking-widest">{t(lang, 'parent_modal_presets')}</label>
             <div className="flex flex-wrap gap-2">
               {PRESETS.map(p => (
                 <button key={p.label}
@@ -211,45 +190,30 @@ function RewardModal({ onConfirm, onClose }) {
               ))}
             </div>
           </div>
-
-          {/* Custom name */}
           <div className="flex flex-col gap-2">
-            <label className="font-body font-bold text-xs text-muted uppercase tracking-widest">Reward name</label>
-            <input
-              type="text"
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="e.g. Extra playtime..."
-              className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 font-display font-bold text-lg text-ink outline-none focus:border-duo"
-            />
+            <label className="font-body font-bold text-xs text-muted uppercase tracking-widest">{t(lang, 'parent_modal_name_label')}</label>
+            <input type="text" value={name} onChange={e => setName(e.target.value)}
+              placeholder={t(lang, 'parent_modal_name_placeholder')}
+              className="w-full border-2 border-gray-200 rounded-2xl px-4 py-3 font-display font-bold text-lg text-ink outline-none focus:border-duo" />
           </div>
-
-          {/* Cost */}
           <div className="flex flex-col gap-2">
-            <label className="font-body font-bold text-xs text-muted uppercase tracking-widest">Cost in coins</label>
+            <label className="font-body font-bold text-xs text-muted uppercase tracking-widest">{t(lang, 'parent_modal_cost_label')}</label>
             <div className="flex items-center gap-3">
-              <input
-                type="range" min={10} max={200} step={10}
-                value={cost} onChange={e => setCost(Number(e.target.value))}
-                className="flex-1 accent-duo"
-              />
+              <input type="range" min={10} max={200} step={10} value={cost}
+                onChange={e => setCost(Number(e.target.value))} className="flex-1 accent-duo" />
               <div className="flex items-center gap-1 w-20">
                 <CoinIcon size={20} />
                 <span className="font-display font-bold text-lg text-amber-500">{cost}</span>
               </div>
             </div>
           </div>
-
-          <button
-            onClick={handleSubmit}
-            disabled={!name.trim() || saving}
-            className="w-full bg-duo disabled:opacity-40 text-white font-display font-bold text-lg rounded-2xl py-4 shadow-[0_4px_0_#58a700] active:shadow-none active:translate-y-1 transition-all"
-          >
-            {saving ? 'Creating...' : 'Create Reward →'}
+          <button onClick={handleSubmit} disabled={!name.trim() || saving}
+            className="w-full bg-duo disabled:opacity-40 text-white font-display font-bold text-lg rounded-2xl py-4 transition-all active:translate-y-1"
+            style={{ boxShadow: '0 4px 0 #46a302' }}>
+            {saving ? t(lang, 'parent_modal_creating') : t(lang, 'parent_modal_cta')}
           </button>
-
           <button onClick={onClose} className="w-full text-muted font-body font-bold text-sm py-2 text-center">
-            Cancel
+            {t(lang, 'parent_modal_cancel')}
           </button>
         </div>
       </div>
