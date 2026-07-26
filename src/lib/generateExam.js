@@ -1,15 +1,32 @@
+import { supabase } from './supabaseClient'
+
 const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-exam`
 const ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-/**
- * Takes a File, converts it directly to base64 (no compression),
- * sends it to the Edge Function, returns exam JSON.
- */
-export async function generateExam(imageFile) {
-  console.log('📁 File selected:', imageFile.name, imageFile.type, Math.round(imageFile.size / 1024) + 'KB')
+async function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result.split(',')[1])
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
 
-  const base64 = await fileToBase64(imageFile)
-  console.log('📦 Base64 length:', base64.length)
+export async function generateExam(files) {
+  // Accept single file or array
+  const fileArray = Array.isArray(files) ? files : [files]
+
+  console.log(`📁 Processing ${fileArray.length} image(s)`)
+
+  const images = await Promise.all(
+    fileArray.map(async (file) => ({
+      data: await fileToBase64(file),
+      mediaType: file.type || 'image/jpeg',
+    }))
+  )
+
+  // Get current user for tracking
+  const { data: { user } } = await supabase.auth.getUser()
 
   const response = await fetch(EDGE_FUNCTION_URL, {
     method: 'POST',
@@ -18,27 +35,15 @@ export async function generateExam(imageFile) {
       'Authorization': `Bearer ${ANON_KEY}`,
     },
     body: JSON.stringify({
-      image: base64,
-      mediaType: imageFile.type || 'image/jpeg',
+      images,
+      user_id: user?.id,
     }),
   })
 
   if (!response.ok) {
-    const error = await response.text()
-    throw new Error(`Edge Function error: ${error}`)
+    const err = await response.json().catch(() => ({ error: 'Unknown error' }))
+    throw new Error(err.error || 'Failed to generate exam')
   }
 
   return response.json()
-}
-
-function fileToBase64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader()
-    reader.onload = () => {
-      const base64 = reader.result.split(',')[1]
-      resolve(base64)
-    }
-    reader.onerror = reject
-    reader.readAsDataURL(file)
-  })
 }
