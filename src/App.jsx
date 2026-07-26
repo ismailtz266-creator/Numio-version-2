@@ -65,10 +65,14 @@ export default function App() {
 
   if (!onboarded) {
     return (
-      <Onboarding onComplete={() => {
-        setOnboarded(true)
-        getStreak().then(s => setStreak(s.count)).catch(() => {})
-      }} />
+      <LangContext.Provider value={lang}>
+        <div dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+          <Onboarding onComplete={() => {
+            setOnboarded(true)
+            getStreak().then(s => setStreak(s.count)).catch(() => {})
+          }} onLanguageChange={setLang} />
+        </div>
+      </LangContext.Provider>
     )
   }
 
